@@ -55,11 +55,6 @@ public class JwtService {
         return jwtExpiration;
     }
 
-    private String getEmailFromUserDetails(String username){
-        Optional<User> user = userRepository.findByUsername(username);
-        return user.get().getEmail();
-    }
-
     private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
@@ -68,7 +63,7 @@ public class JwtService {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(getEmailFromUserDetails(userDetails.getUsername()))
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

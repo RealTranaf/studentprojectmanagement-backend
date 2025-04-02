@@ -8,7 +8,6 @@ import com.ld.springsecurity.response.LoginResponse;
 import com.ld.springsecurity.service.AuthService;
 import com.ld.springsecurity.service.JwtService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
