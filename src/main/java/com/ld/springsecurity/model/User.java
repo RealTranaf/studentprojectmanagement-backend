@@ -32,6 +32,9 @@ public class User implements UserDetails {
 
     private boolean enabled;
 
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokenList;
+
     @Column(name = "verification_code")
     private String verificationCode;
 
