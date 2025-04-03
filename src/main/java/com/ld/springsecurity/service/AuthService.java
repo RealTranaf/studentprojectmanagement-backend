@@ -3,8 +3,12 @@ package com.ld.springsecurity.service;
 import com.ld.springsecurity.dto.LoginUserDto;
 import com.ld.springsecurity.dto.RegisterUserDto;
 import com.ld.springsecurity.dto.VerifyUserDto;
+import com.ld.springsecurity.model.Token;
+import com.ld.springsecurity.model.TokenType;
 import com.ld.springsecurity.model.User;
+import com.ld.springsecurity.repo.TokenRepository;
 import com.ld.springsecurity.repo.UserRepository;
+import com.ld.springsecurity.response.LoginResponse;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -25,13 +30,27 @@ public class AuthService {
 
     private final EmailService emailService;
 
+    private final TokenRepository tokenRepository;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService) {
+    private final JwtService jwtService;
+
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, TokenRepository tokenRepository, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.emailService = emailService;
+        this.tokenRepository = tokenRepository;
+        this.jwtService = jwtService;
     }
+
+//    public User signup(RegisterUserDto input){
+//        User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
+//        user.setVerificationCode(generateVerificationCode());
+//        user.setVerificationCodeExpireAt(LocalDateTime.now().plusMinutes(15));
+//        user.setEnabled(false);
+//        sendVerificationEmail(user);
+//        return userRepository.save(user);
+//    }
 
     public User signup(RegisterUserDto input){
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
@@ -39,10 +58,13 @@ public class AuthService {
         user.setVerificationCodeExpireAt(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
         sendVerificationEmail(user);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+//        String jwttoken = jwtService.generateToken(user);
+//        saveUserToken(savedUser, jwttoken);
+        return savedUser;
     }
 
-    public User auth(LoginUserDto input){
+    public LoginResponse auth(LoginUserDto input){
         User user = userRepository.findByUsername(input.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.isEnabled()){
@@ -55,7 +77,10 @@ public class AuthService {
                         input.getPassword()
                 )
         );
-        return user;
+        revokeAllTokenFromUser(user);
+        String jwttoken = jwtService.generateToken(user);
+        saveUserToken(user, jwttoken);
+        return new LoginResponse(jwttoken, jwtService.getJwtExpiration());
     }
     public void verifyUser(VerifyUserDto input){
         Optional<User> optionalUser = userRepository.findByUsername(input.getUsername());
@@ -123,5 +148,28 @@ public class AuthService {
 
         int code = random.nextInt(900000) + 100000;
         return String.valueOf(code);
+    }
+
+    public void saveUserToken(User user, String jwttoken){
+        Token token = Token.builder()
+                .user(user)
+                .token(jwttoken)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .build();
+        tokenRepository.save(token);
+    }
+
+    public void revokeAllTokenFromUser(User user){
+        List<Token> validUserToken = tokenRepository.findAllValidTokenByUser(user.getId());
+        if (validUserToken.isEmpty()){
+            return;
+        }
+        validUserToken.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserToken);
     }
 }

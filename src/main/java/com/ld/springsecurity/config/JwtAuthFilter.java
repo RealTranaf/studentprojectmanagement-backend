@@ -1,7 +1,6 @@
 package com.ld.springsecurity.config;
 
-import com.ld.springsecurity.model.User;
-import com.ld.springsecurity.repo.UserRepository;
+import com.ld.springsecurity.repo.TokenRepository;
 import com.ld.springsecurity.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -27,9 +25,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    private final TokenRepository tokenRepository;
+    public JwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService, TokenRepository tokenRepository) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.tokenRepository = tokenRepository;
     }
 
     @Override
@@ -53,7 +53,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (username != null && authentication == null){
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            if(jwtService.isTokenValid(jwt, userDetails)){
+            boolean isTokenValid = tokenRepository.findByToken(jwt)
+                    .map(t -> !t.isExpired() && !t.isRevoked())
+                    .orElse(false);
+
+            if(jwtService.isTokenValid(jwt, userDetails) && isTokenValid){
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
