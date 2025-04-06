@@ -1,5 +1,7 @@
 package com.ld.springsecurity.config;
 
+import com.ld.springsecurity.model.Permission;
+import com.ld.springsecurity.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -15,6 +17,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+
+import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
@@ -37,6 +41,20 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
+
+                        .requestMatchers("/admin/**").hasAnyRole(Role.ADMIN.name())
+                        .requestMatchers("/manager/**").hasAnyRole(Role.MANAGER.name(), Role.MANAGER.name())
+
+                        .requestMatchers(GET, "/manager/**").hasAnyAuthority(Permission.ADMIN_READ.name(), Permission.MANAGER_READ.name())
+                        .requestMatchers(POST, "/manager/**").hasAnyAuthority(Permission.ADMIN_CREATE.name(), Permission.MANAGER_CREATE.name())
+                        .requestMatchers(PUT, "/manager/**").hasAnyAuthority(Permission.ADMIN_UPDATE.name(), Permission.MANAGER_UPDATE.name())
+                        .requestMatchers(DELETE, "/manager/**").hasAnyAuthority(Permission.ADMIN_DELETE.name(), Permission.MANAGER_DELETE.name())
+
+                        .requestMatchers(GET, "/admin/**").hasAuthority(Permission.ADMIN_READ.name())
+                        .requestMatchers(POST, "/admin/**").hasAuthority(Permission.ADMIN_CREATE.name())
+                        .requestMatchers(PUT, "/admin/**").hasAuthority(Permission.ADMIN_UPDATE.name())
+                        .requestMatchers(DELETE, "/admin/**").hasAuthority(Permission.ADMIN_DELETE.name())
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

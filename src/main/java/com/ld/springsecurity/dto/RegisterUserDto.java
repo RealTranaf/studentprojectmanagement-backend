@@ -1,5 +1,6 @@
 package com.ld.springsecurity.dto;
 
+import com.ld.springsecurity.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,4 +13,5 @@ public class RegisterUserDto {
     private String email;
     private String password;
     private String username;
+    private Role role;
 }
