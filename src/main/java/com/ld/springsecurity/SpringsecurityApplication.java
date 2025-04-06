@@ -19,11 +19,11 @@ public class SpringsecurityApplication {
     public CommandLineRunner commandLineRunner(AuthService authService){
         return args -> {
             RegisterUserDto admin = new RegisterUserDto("admin@mail.com", "password", "Admin", Role.ADMIN);
-            System.out.println("Admin token: " + authService.signup(admin));
+            System.out.println("Admin token: " + authService.signup(admin).getTokenList());
 
             RegisterUserDto manager = new RegisterUserDto("manager@mail.com", "password", "Manager", Role.MANAGER);
-            System.out.println("Manager token: " + authService.signup(manager));
-        }
+            System.out.println("Manager token: " + authService.signup(manager).getTokenList());
+        };
     }
 
 

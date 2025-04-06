@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
 
                         .requestMatchers("/admin/**").hasAnyRole(Role.ADMIN.name())
-                        .requestMatchers("/manager/**").hasAnyRole(Role.MANAGER.name(), Role.MANAGER.name())
+                        .requestMatchers("/manager/**").hasAnyRole(Role.ADMIN.name(), Role.MANAGER.name())
 
                         .requestMatchers(GET, "/manager/**").hasAnyAuthority(Permission.ADMIN_READ.name(), Permission.MANAGER_READ.name())
                         .requestMatchers(POST, "/manager/**").hasAnyAuthority(Permission.ADMIN_CREATE.name(), Permission.MANAGER_CREATE.name())

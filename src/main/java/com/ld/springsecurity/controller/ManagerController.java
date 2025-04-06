@@ -1,9 +1,11 @@
 package com.ld.springsecurity.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/manager")
+
 public class ManagerController {
     @GetMapping()
     public String helloWorld1Manager(){
