@@ -28,12 +28,12 @@ public class UserController {
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(currentUser);
     }
-//
-//    @GetMapping("/all")
-//    public ResponseEntity<List<User>> allUser(){
-//        List<User> userList = userService.allUsers();
-//        return ResponseEntity.ok(userList);
-//    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> allUser(){
+        List<User> userList = userService.allUsers();
+        return ResponseEntity.ok(userList);
+    }
 
     @GetMapping("/")
     public ResponseEntity<String> helloworld(){
