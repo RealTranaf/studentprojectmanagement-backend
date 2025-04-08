@@ -80,7 +80,7 @@ public class AuthService {
         revokeAllTokenFromUser(user);
         String jwttoken = jwtService.generateToken(user);
         saveUserToken(user, jwttoken);
-        return new LoginResponse(jwttoken, jwtService.getJwtExpiration());
+        return new LoginResponse(user.getUsername(), user.getEmail(), user.getRole(), jwttoken, jwtService.getJwtExpiration());
     }
     public void verifyUser(VerifyUserDto input){
         Optional<User> optionalUser = userRepository.findByUsername(input.getUsername());
