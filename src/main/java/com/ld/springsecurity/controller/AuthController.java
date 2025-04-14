@@ -56,19 +56,19 @@ public class AuthController {
     public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto){
         try{
             authService.verifyUser(verifyUserDto);
-            return ResponseEntity.ok("Account verified successfully");
+            return ResponseEntity.ok(new MessageResponse("Account verified successfully"));
         } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?> resendCode(@RequestParam String email){
+    public ResponseEntity<?> resendCode(@RequestParam String username){
         try{
-            authService.resendCode(email);
-            return ResponseEntity.ok("Verification code sent.");
+            authService.resendCode(username);
+            return ResponseEntity.ok(new MessageResponse("Verification code sent."));
         } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
 
