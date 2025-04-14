@@ -1,6 +1,7 @@
 package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.dto.LoginUserDto;
+import com.ld.springsecurity.dto.MessageResponse;
 import com.ld.springsecurity.dto.RegisterUserDto;
 import com.ld.springsecurity.dto.VerifyUserDto;
 import com.ld.springsecurity.model.User;
@@ -9,6 +10,7 @@ import com.ld.springsecurity.service.AuthService;
 import com.ld.springsecurity.service.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -23,11 +25,23 @@ public class AuthController {
         this.authService = authService;
     }
 
+//    @PostMapping("/signup")
+//    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto){
+//        User registerUser = authService.signup(registerUserDto);
+//        return ResponseEntity.ok(registerUser);
+//    }
+
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto){
-        User registerUser = authService.signup(registerUserDto);
-        return ResponseEntity.ok(registerUser);
+    public ResponseEntity<?> register(@RequestBody RegisterUserDto registerUserDto){
+        String signupStatus = authService.signup(registerUserDto);
+        if (signupStatus.equals("emailDupe")){
+            return ResponseEntity.badRequest().body(new MessageResponse("This email has already been registered"));
+        } else if (signupStatus.equals("usernameDupe")){
+            return ResponseEntity.badRequest().body(new MessageResponse("This username has already been taken"));
+        }
+        return ResponseEntity.ok(new MessageResponse("User registered successfully"));
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto){

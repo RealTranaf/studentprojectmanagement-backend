@@ -44,24 +44,29 @@ public class AuthService {
     }
 
 //    public User signup(RegisterUserDto input){
-//        User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
+//        User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getRole());
 //        user.setVerificationCode(generateVerificationCode());
 //        user.setVerificationCodeExpireAt(LocalDateTime.now().plusMinutes(15));
 //        user.setEnabled(false);
 //        sendVerificationEmail(user);
-//        return userRepository.save(user);
+//        User savedUser = userRepository.save(user);
+//        return savedUser;
 //    }
 
-    public User signup(RegisterUserDto input){
+    public String signup(RegisterUserDto input){
+        if (userRepository.existsByEmail(input.getEmail())){
+            return "emailDupe";
+        }
+        if (userRepository.existsByUsername(input.getUsername())){
+            return "usernameDupe";
+        }
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getRole());
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpireAt(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
         sendVerificationEmail(user);
         User savedUser = userRepository.save(user);
-//        String jwttoken = jwtService.generateToken(user);
-//        saveUserToken(savedUser, jwttoken);
-        return savedUser;
+        return "success";
     }
 
     public LoginResponse auth(LoginUserDto input){
