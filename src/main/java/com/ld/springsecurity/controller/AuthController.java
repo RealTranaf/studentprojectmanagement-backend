@@ -1,9 +1,6 @@
 package com.ld.springsecurity.controller;
 
-import com.ld.springsecurity.dto.LoginUserDto;
-import com.ld.springsecurity.dto.MessageResponse;
-import com.ld.springsecurity.dto.RegisterUserDto;
-import com.ld.springsecurity.dto.VerifyUserDto;
+import com.ld.springsecurity.dto.*;
 import com.ld.springsecurity.model.User;
 import com.ld.springsecurity.response.LoginResponse;
 import com.ld.springsecurity.service.AuthService;
@@ -25,31 +22,28 @@ public class AuthController {
         this.authService = authService;
     }
 
-//    @PostMapping("/signup")
-//    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto){
-//        User registerUser = authService.signup(registerUserDto);
-//        return ResponseEntity.ok(registerUser);
-//    }
 
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody RegisterUserDto registerUserDto){
-        String signupStatus = authService.signup(registerUserDto);
-        if (signupStatus.equals("emailDupe")){
-            return ResponseEntity.badRequest().body(new MessageResponse("This email has already been registered"));
-        } else if (signupStatus.equals("usernameDupe")){
-            return ResponseEntity.badRequest().body(new MessageResponse("This username has already been taken"));
+        try{
+            authService.signup(registerUserDto);
+            return ResponseEntity.ok(new MessageResponse("User registered successfully"));
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
-        return ResponseEntity.ok(new MessageResponse("User registered successfully"));
     }
 
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto){
-//        User authenticatedUser = authService.auth(loginUserDto);
-//        String jwttoken = jwtService.generateToken(authenticatedUser);
-//        LoginResponse loginResponse = new LoginResponse(jwttoken, jwtService.getJwtExpiration());
-        LoginResponse loginResponse = authService.auth(loginUserDto);
-        return ResponseEntity.ok(loginResponse);
+    public ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto){
+        try{
+            LoginResponse loginResponse = authService.auth(loginUserDto);
+            return ResponseEntity.ok(loginResponse);
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+
+
     }
 
     @PostMapping("/verify")
@@ -63,9 +57,9 @@ public class AuthController {
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?> resendCode(@RequestParam String username){
+    public ResponseEntity<?> resendCode(@RequestBody ResendDto resendDto){
         try{
-            authService.resendCode(username);
+            authService.resendCode(resendDto);
             return ResponseEntity.ok(new MessageResponse("Verification code sent."));
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

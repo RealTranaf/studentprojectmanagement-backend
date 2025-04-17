@@ -2,6 +2,7 @@ package com.ld.springsecurity.service;
 
 import com.ld.springsecurity.dto.LoginUserDto;
 import com.ld.springsecurity.dto.RegisterUserDto;
+import com.ld.springsecurity.dto.ResendDto;
 import com.ld.springsecurity.dto.VerifyUserDto;
 import com.ld.springsecurity.model.Token;
 import com.ld.springsecurity.model.TokenType;
@@ -53,12 +54,12 @@ public class AuthService {
 //        return savedUser;
 //    }
 
-    public String signup(RegisterUserDto input){
+    public void signup(RegisterUserDto input){
         if (userRepository.existsByEmail(input.getEmail())){
-            return "emailDupe";
+            throw new RuntimeException("This email has already been registered");
         }
         if (userRepository.existsByUsername(input.getUsername())){
-            return "usernameDupe";
+            throw new RuntimeException("This username has already been taken");
         }
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getRole());
         user.setVerificationCode(generateVerificationCode());
@@ -66,15 +67,14 @@ public class AuthService {
         user.setEnabled(false);
         sendVerificationEmail(user);
         User savedUser = userRepository.save(user);
-        return "success";
     }
 
     public LoginResponse auth(LoginUserDto input){
         User user = userRepository.findByUsername(input.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        if (!user.isEnabled()){
-            throw new RuntimeException("Account not verified. Please verify your account.");
-        }
+//        if (!user.isEnabled()){
+//            throw new RuntimeException("Account not verified. Please verify your account.");
+//        }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -109,8 +109,8 @@ public class AuthService {
         }
     }
 
-    public void resendCode(String username){
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+    public void resendCode(ResendDto input){
+        Optional<User> optionalUser = userRepository.findByUsername(input.getUsername());
         if (optionalUser.isPresent()){
             User user = optionalUser.get();
             if (user.isEnabled()){
