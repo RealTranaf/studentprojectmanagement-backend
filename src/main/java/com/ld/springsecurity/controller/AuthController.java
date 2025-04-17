@@ -66,5 +66,33 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDto forgotPasswordDto){
+        try{
+            authService.generateResetToken(forgotPasswordDto);
+            return ResponseEntity.ok(new MessageResponse("Password reset link sent to your email."));
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
 
+    @GetMapping("/reset-password")
+    public ResponseEntity<?> validateResetToken(@RequestParam String token){
+        boolean isValid = authService.validateResetToken(token);
+        if (isValid) {
+            return ResponseEntity.ok("Token is valid.");
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Invalid or expired token"));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+        try{
+            authService.resetPassword(resetPasswordDto);
+            return ResponseEntity.ok(new MessageResponse("Your password has been changed!"));
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
 }

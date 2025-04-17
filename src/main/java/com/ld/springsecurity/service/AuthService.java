@@ -1,12 +1,11 @@
 package com.ld.springsecurity.service;
 
-import com.ld.springsecurity.dto.LoginUserDto;
-import com.ld.springsecurity.dto.RegisterUserDto;
-import com.ld.springsecurity.dto.ResendDto;
-import com.ld.springsecurity.dto.VerifyUserDto;
+import com.ld.springsecurity.dto.*;
+import com.ld.springsecurity.model.ResetToken;
 import com.ld.springsecurity.model.Token;
 import com.ld.springsecurity.model.TokenType;
 import com.ld.springsecurity.model.User;
+import com.ld.springsecurity.repo.ResetTokenRepository;
 import com.ld.springsecurity.repo.TokenRepository;
 import com.ld.springsecurity.repo.UserRepository;
 import com.ld.springsecurity.response.LoginResponse;
@@ -20,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -35,13 +35,16 @@ public class AuthService {
 
     private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, TokenRepository tokenRepository, JwtService jwtService) {
+    private final ResetTokenRepository resetTokenRepository;
+
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, TokenRepository tokenRepository, JwtService jwtService, ResetTokenRepository resetTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.emailService = emailService;
         this.tokenRepository = tokenRepository;
         this.jwtService = jwtService;
+        this.resetTokenRepository = resetTokenRepository;
     }
 
 //    public User signup(RegisterUserDto input){
@@ -128,6 +131,64 @@ public class AuthService {
         }
     }
 
+    public void generateResetToken(ForgotPasswordDto input){
+        Optional<User> optionalUser = userRepository.findByUsername(input.getUsername());
+        if (optionalUser.isPresent()){
+            User user = optionalUser.get();
+            String token = UUID.randomUUID().toString();
+            ResetToken resetToken = new ResetToken(token, user, LocalDateTime.now().plusMinutes(15));
+            resetTokenRepository.save(resetToken);
+            String resetLink = "http://localhost:3000/reset-password?token=" + token;
+            String resetHtml = "<html lang=\"en\">"
+                    + "<body style=\"font-family: Arial, Helvetica, sans-serif;\">"
+                    + "<div style=\"background-color: #B76E79; padding: 30px;\">"
+                    + "<h2 style=\"color: #333\">You have requested to have your password changed!</h2>"
+                    + "<p style=\"font-size: 20px;\">Click the link below to reset your password:</p>"
+                    + "<div style=\"background-color: #e9e9e9; padding: 20px; border-radius: 5px;\">"
+                    + "<p style=\"font-size: 30px; font-weight: bold; color: #333;\">" + resetLink + "</p>"
+                    + "</div>"
+                    + "</div>"
+                    + "</body>"
+                    + "</html>";
+            try {
+                emailService.sendEmail(user.getEmail(), "Password Reset Request", resetHtml);
+            } catch (MessagingException e){
+                e.printStackTrace();
+            }
+        }
+        else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
+    public boolean validateResetToken(String token){
+        Optional<ResetToken> optionalResetToken = resetTokenRepository.findByToken(token);
+        if (optionalResetToken.isPresent()){
+            ResetToken resetToken = optionalResetToken.get();
+            if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+                resetTokenRepository.delete(resetToken);
+                return false;
+            }
+            return true;
+        } else {
+            throw new RuntimeException("Invalid token!");
+        }
+    }
+
+    public void resetPassword(ResetPasswordDto input){
+        Optional<ResetToken> optionalResetToken = resetTokenRepository.findByToken(input.getToken());
+        if (optionalResetToken.isPresent()){
+            ResetToken resetToken = optionalResetToken.get();
+            User user = resetToken.getUser();
+            user.setPassword(passwordEncoder.encode(input.getNewPassword()));
+            userRepository.save(user);
+
+            resetTokenRepository.delete(resetToken);
+        } else {
+            throw new RuntimeException("Invalid token!");
+        }
+    }
+
     public void sendVerificationEmail(User user){
         String subject = "Account Verification";
         String verificationCode = user.getVerificationCode();
@@ -143,7 +204,7 @@ public class AuthService {
                 + "</body>"
                 + "</html>";
         try {
-            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+            emailService.sendEmail(user.getEmail(), subject, htmlMessage);
         } catch (MessagingException e){
             e.printStackTrace();
         }
@@ -175,6 +236,7 @@ public class AuthService {
             token.setExpired(true);
             token.setRevoked(true);
         });
-        tokenRepository.saveAll(validUserToken);
+//        tokenRepository.saveAll(validUserToken);
+        tokenRepository.deleteAll(validUserToken);
     }
 }
