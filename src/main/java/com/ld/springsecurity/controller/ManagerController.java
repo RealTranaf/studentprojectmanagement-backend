@@ -5,23 +5,23 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/manager")
+@RequestMapping("/teacher")
 
 public class ManagerController {
     @GetMapping()
-    public String helloWorld1Manager(){
-        return "Hello World Manager GET";
+    public String helloWorld1Teacher(){
+        return "Hello World Teacher GET";
     }
     @PostMapping()
-    public String helloWorld2Manager(){
-        return "Hello World Manager POST";
+    public String helloWorld2Teacher(){
+        return "Hello World Teacher POST";
     }
     @PutMapping()
-    public String helloWorld3Manager(){
-        return "Hello World Manager PUT";
+    public String helloWorld3Teacher(){
+        return "Hello World Teacher PUT";
     }
     @DeleteMapping()
-    public String helloWorld4Manager(){
-        return "Hello World Manager DELETE";
+    public String helloWorld4Teacher(){
+        return "Hello World Teacher DELETE";
     }
 }

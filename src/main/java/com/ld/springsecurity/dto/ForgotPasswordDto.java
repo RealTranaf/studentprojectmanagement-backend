@@ -7,5 +7,5 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class ForgotPasswordDto {
-    private String username;
+    private String email;
 }

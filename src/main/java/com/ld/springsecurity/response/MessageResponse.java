@@ -1,4 +1,4 @@
-package com.ld.springsecurity.dto;
+package com.ld.springsecurity.response;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Getter
 @RequiredArgsConstructor
 public enum Role {
-    USER,
-    ADMIN,
-    MANAGER
+    STUDENT,
+    TEACHER,
+    ADMIN
 }

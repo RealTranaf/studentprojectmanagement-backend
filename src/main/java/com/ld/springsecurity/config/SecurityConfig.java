@@ -1,6 +1,5 @@
 package com.ld.springsecurity.config;
 
-import com.ld.springsecurity.model.Permission;
 import com.ld.springsecurity.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +17,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-
-import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
@@ -43,10 +40,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**", "/public").permitAll()
-//                        .requestMatchers("").permitAll()
 
                         .requestMatchers("/admin/**").hasAnyRole(Role.ADMIN.name())
-                        .requestMatchers("/manager/**").hasAnyRole(Role.ADMIN.name(), Role.MANAGER.name())
+                        .requestMatchers("/teacher/**").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
 
                         .anyRequest().authenticated()
                 )

@@ -1,8 +1,8 @@
 package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.dto.*;
-import com.ld.springsecurity.model.User;
 import com.ld.springsecurity.response.LoginResponse;
+import com.ld.springsecurity.response.MessageResponse;
 import com.ld.springsecurity.service.AuthService;
 import com.ld.springsecurity.service.JwtService;
 import org.springframework.http.ResponseEntity;

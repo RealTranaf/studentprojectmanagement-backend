@@ -132,9 +132,12 @@ public class AuthService {
     }
 
     public void generateResetToken(ForgotPasswordDto input){
-        Optional<User> optionalUser = userRepository.findByUsername(input.getUsername());
+        Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
         if (optionalUser.isPresent()){
             User user = optionalUser.get();
+            if (resetTokenRepository.existsByUser(user)){
+                resetTokenRepository.deleteByUser(user);
+            }
             String token = UUID.randomUUID().toString();
             ResetToken resetToken = new ResetToken(token, user, LocalDateTime.now().plusMinutes(15));
             resetTokenRepository.save(resetToken);
@@ -236,7 +239,6 @@ public class AuthService {
             token.setExpired(true);
             token.setRevoked(true);
         });
-//        tokenRepository.saveAll(validUserToken);
-        tokenRepository.deleteAll(validUserToken);
+        tokenRepository.saveAll(validUserToken);
     }
 }
