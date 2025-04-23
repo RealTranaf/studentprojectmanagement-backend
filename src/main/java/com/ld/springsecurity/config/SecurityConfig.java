@@ -21,7 +21,6 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
     private final AuthenticationProvider authProvider;
 
@@ -45,6 +44,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/admin/**").hasAnyRole(Role.ADMIN.name())
                         .requestMatchers("/teacher/**").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/create").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/{roomId}/add-users").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
 
                         .anyRequest().authenticated()
                 )

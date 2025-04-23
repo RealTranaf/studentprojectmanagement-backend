@@ -1,4 +1,4 @@
-package com.ld.springsecurity.dto;
+package com.ld.springsecurity.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateRoomDto {
-    private String name;
-//    private String createdBy;
+public class CreateRoomResponse {
+    String name;
 }

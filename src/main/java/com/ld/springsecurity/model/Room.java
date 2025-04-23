@@ -1,5 +1,7 @@
 package com.ld.springsecurity.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,13 +22,19 @@ public class Room {
 
     private String name;
 
+    @ManyToOne
+//    @JsonBackReference
+    @JoinColumn(name = "user_id")
+    private User createdBy;
+
     @ManyToMany
+//    @JsonBackReference
     @JoinTable(
             name = "room_users",
             joinColumns = @JoinColumn(name = "room_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> users;
+    private Set<User> users = new HashSet<>();
 
     public Room(String name, Set<User> users) {
         this.name = name;

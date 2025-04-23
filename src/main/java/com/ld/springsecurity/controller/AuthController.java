@@ -22,7 +22,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody RegisterUserDto registerUserDto){
         try{
@@ -32,7 +31,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto){

@@ -1,5 +1,6 @@
 package com.ld.springsecurity.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,8 +41,11 @@ public class User implements UserDetails {
     @JsonManagedReference
     private List<Token> tokenList;
 
-    @ManyToMany(mappedBy = "users")
-    private Set<Room> rooms;
+    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
+    private List<Room> createdRooms;
+
+    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
+    private Set<Room> rooms = new HashSet<>();
 
     @Column(name = "verification_code")
     private String verificationCode;
