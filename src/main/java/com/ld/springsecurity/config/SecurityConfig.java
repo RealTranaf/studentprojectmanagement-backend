@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/teacher/**").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
                         .requestMatchers("/rooms/create").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
                         .requestMatchers("/rooms/{roomId}/add-users").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/{roomId}/remove-users").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
 
                         .anyRequest().authenticated()
                 )

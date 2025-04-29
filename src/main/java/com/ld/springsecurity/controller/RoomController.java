@@ -2,6 +2,7 @@ package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.dto.AddUsersToRoomDto;
 import com.ld.springsecurity.dto.CreateRoomDto;
+import com.ld.springsecurity.dto.RemoveUsersFromRoomDto;
 import com.ld.springsecurity.model.Room;
 import com.ld.springsecurity.response.CreateRoomResponse;
 import com.ld.springsecurity.response.MessageResponse;
@@ -58,10 +59,20 @@ public class RoomController{
     }
 
     @PostMapping("/{roomId}/add-users")
-    public ResponseEntity addUserToRoom(@PathVariable String roomId, @RequestBody AddUsersToRoomDto addUsersToRoomDto){
+    public ResponseEntity<?> addUserToRoom(@PathVariable String roomId, @RequestBody AddUsersToRoomDto addUsersToRoomDto){
         try{
             roomService.addUsersToRoom(roomId, addUsersToRoomDto.getUsernames());
             return ResponseEntity.ok(new MessageResponse("Users added to the room successfully"));
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{roomId}/remove-users")
+    public ResponseEntity<?> removeUsersFromRoom(@PathVariable String roomId, @RequestParam List<String> username){
+        try{
+            roomService.removeUsersFromRoom(roomId, username);
+            return ResponseEntity.ok("User removed successfully");
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }

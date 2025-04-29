@@ -1,5 +1,6 @@
 package com.ld.springsecurity.controller;
 
+import com.ld.springsecurity.dto.UserDto;
 import com.ld.springsecurity.model.User;
 import com.ld.springsecurity.repo.UserRepository;
 import com.ld.springsecurity.response.MessageResponse;
@@ -10,9 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,5 +50,13 @@ public class UserController {
     @GetMapping("/")
     public ResponseEntity<String> helloworld(){
         return ResponseEntity.ok("Hello world");
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUsers(@RequestParam String query){
+        List<UserDto> userList = userService.searchUsers(query);
+//        System.out.println(userList);
+
+        return ResponseEntity.ok(userList);
     }
 }

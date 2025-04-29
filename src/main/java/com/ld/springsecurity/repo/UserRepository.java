@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     List<User> findByUsernameIn(List<String> usernames);
 
+    List<User> findTop5ByUsernameContainingIgnoreCase(String username);
+
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);

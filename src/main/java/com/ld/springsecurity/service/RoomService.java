@@ -74,4 +74,20 @@ public class RoomService {
             throw new RuntimeException("Room not found!");
         }
     }
+
+    public void removeUsersFromRoom(String roomId, List<String> usernameList){
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        if (optionalRoom.isPresent()){
+            Room room = optionalRoom.get();
+            List<User> userList = userRepository.findByUsernameIn(usernameList);
+            if (userList.isEmpty()){
+                throw new RuntimeException("No valid users found for the provided usernames!");
+            }
+            room.getUsers().removeAll(userList);
+            roomRepository.save(room);
+        }
+        else {
+            throw new RuntimeException("Room not found!");
+        }
+    }
 }
