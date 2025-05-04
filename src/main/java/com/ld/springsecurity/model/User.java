@@ -47,6 +47,12 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
     private Set<Room> rooms = new HashSet<>();
 
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
     @Column(name = "verification_code")
     private String verificationCode;
 

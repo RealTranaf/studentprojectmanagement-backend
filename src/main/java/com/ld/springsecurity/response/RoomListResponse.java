@@ -1,9 +1,7 @@
 package com.ld.springsecurity.response;
 
 import com.ld.springsecurity.model.Room;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
