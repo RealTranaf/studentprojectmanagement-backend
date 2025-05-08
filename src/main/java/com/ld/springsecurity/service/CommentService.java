@@ -1,17 +1,18 @@
 package com.ld.springsecurity.service;
 
 import com.ld.springsecurity.dto.CreateCommentDto;
-import com.ld.springsecurity.dto.CreatePostDto;
 import com.ld.springsecurity.model.Comment;
 import com.ld.springsecurity.model.Post;
-import com.ld.springsecurity.model.Room;
 import com.ld.springsecurity.model.User;
 import com.ld.springsecurity.repo.CommentRepository;
 import com.ld.springsecurity.repo.PostRepository;
 import com.ld.springsecurity.repo.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,11 +28,12 @@ public class CommentService {
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
     }
-    public List<Comment> getCommentsFromPost(String postId){
+    public Page<Comment> getCommentsFromPost(String postId, int page, int size){
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isPresent()){
             Post post = optionalPost.get();
-            return commentRepository.findByPost(post);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdTime").descending());
+            return commentRepository.findByPost(post, pageable);
         }
         else {
             throw new RuntimeException("Post not found");

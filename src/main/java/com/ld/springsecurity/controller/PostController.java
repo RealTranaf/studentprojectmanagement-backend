@@ -2,20 +2,20 @@ package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.dto.CreatePostDto;
 import com.ld.springsecurity.model.Post;
-import com.ld.springsecurity.model.Room;
-import com.ld.springsecurity.response.CreateRoomResponse;
 import com.ld.springsecurity.response.MessageResponse;
 import com.ld.springsecurity.response.PostListResponse;
-import com.ld.springsecurity.response.RoomListResponse;
 import com.ld.springsecurity.service.PostService;
 import com.ld.springsecurity.service.RoomService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -41,11 +41,19 @@ public class PostController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> getPosts(@PathVariable String roomId){
+    public ResponseEntity<?> getPosts(@PathVariable String roomId,
+                                      @RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "5") int size){
         try{
-            List<Post> postList = postService.getPostsFromRoom(roomId);
+            Page<Post> postList = postService.getPostsFromRoom(roomId, page, size);
             List<PostListResponse> postListResponse = postList.stream().map(PostListResponse::new).collect(Collectors.toList());
-            return ResponseEntity.ok(postListResponse);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("posts", postListResponse);
+            response.put("currentPage", postList.getNumber());
+            response.put("totalItems", postList.getTotalElements());
+            response.put("totalPages", postList.getTotalPages());
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }

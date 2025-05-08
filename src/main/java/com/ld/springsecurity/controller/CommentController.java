@@ -8,13 +8,16 @@ import com.ld.springsecurity.response.MessageResponse;
 import com.ld.springsecurity.response.PostListResponse;
 import com.ld.springsecurity.service.CommentService;
 import com.ld.springsecurity.service.PostService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -39,11 +42,19 @@ public class CommentController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> getComments(@PathVariable String postId){
+    public ResponseEntity<?> getComments(@PathVariable String postId,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "5") int size){
         try{
-            List<Comment> commentList = commentService.getCommentsFromPost(postId);
+            Page<Comment> commentList = commentService.getCommentsFromPost(postId, page, size);
             List<CommentListResponse> commentListResponse = commentList.stream().map(CommentListResponse::new).collect(Collectors.toList());
-            return ResponseEntity.ok(commentListResponse);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("comments", commentListResponse);
+            response.put("currentPage", commentList.getNumber());
+            response.put("totalItems", commentList.getTotalElements());
+            response.put("totalPages", commentList.getTotalPages());
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }

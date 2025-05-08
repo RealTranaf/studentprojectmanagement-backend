@@ -7,6 +7,11 @@ import com.ld.springsecurity.model.User;
 import com.ld.springsecurity.repo.PostRepository;
 import com.ld.springsecurity.repo.RoomRepository;
 import com.ld.springsecurity.repo.UserRepository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,11 +32,12 @@ public class PostService {
         this.roomRepository = roomRepository;
     }
 
-    public List<Post> getPostsFromRoom(String roomId){
+    public Page<Post> getPostsFromRoom(String roomId, int page, int size){
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
         if (optionalRoom.isPresent()){
             Room room = optionalRoom.get();
-            return postRepository.findByRoom(room);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdTime").descending());
+            return postRepository.findByRoom(room, pageable);
         }
         else {
             throw new RuntimeException("Room not found");
