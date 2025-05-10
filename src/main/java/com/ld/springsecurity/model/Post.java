@@ -18,6 +18,8 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne
@@ -33,6 +35,8 @@ public class Post {
 
     @CreationTimestamp
     private LocalDateTime createdTime;
+
+
 
     public Post(String content, User author, Room room) {
         this.content = content;

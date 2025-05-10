@@ -1,6 +1,7 @@
 package com.ld.springsecurity.service;
 
 import com.ld.springsecurity.dto.CreatePostDto;
+import com.ld.springsecurity.dto.EditPostDto;
 import com.ld.springsecurity.model.Post;
 import com.ld.springsecurity.model.Room;
 import com.ld.springsecurity.model.User;
@@ -70,5 +71,39 @@ public class PostService {
             throw new RuntimeException("Post not found");
         }
     }
-
+    public void deletePost(String roomId, String postId, String username){
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isPresent()){
+            Post post = optionalPost.get();
+            if (!post.getRoom().getId().equals(roomId)){
+                throw new RuntimeException("Post does not belong to the specified room");
+            }
+            if (!post.getAuthor().getUsername().equals(username)) {
+                throw new RuntimeException("You are not authorized to delete this post");
+            }
+            postRepository.delete(post);
+        }
+        else {
+            throw new RuntimeException("Post not found");
+        }
+    }
+    public void editPost(String roomId, String postId, EditPostDto editPostDto, String username){
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isPresent()){
+            Post post = optionalPost.get();
+            if (!post.getRoom().getId().equals(roomId)){
+                throw new RuntimeException("Post does not belong to the specified room");
+            }
+            if (!post.getAuthor().getUsername().equals(username)) {
+                throw new RuntimeException("You are not authorized to edit this post");
+            }
+//            System.out.println("Username: " + username);
+//            System.out.println("Post Author: " + post.getAuthor());
+            post.setContent(editPostDto.getContent());
+            postRepository.save(post);
+        }
+        else {
+            throw new RuntimeException("Post not found");
+        }
+    }
 }

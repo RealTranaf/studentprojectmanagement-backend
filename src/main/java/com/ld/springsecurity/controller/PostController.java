@@ -1,6 +1,7 @@
 package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.dto.CreatePostDto;
+import com.ld.springsecurity.dto.EditPostDto;
 import com.ld.springsecurity.model.Post;
 import com.ld.springsecurity.response.MessageResponse;
 import com.ld.springsecurity.response.PostListResponse;
@@ -55,6 +56,25 @@ public class PostController {
             response.put("totalPages", postList.getTotalPages());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable String roomId, @PathVariable String postId, @AuthenticationPrincipal UserDetails userDetails){
+        try{
+            postService.deletePost(roomId, postId, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Post deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<?> updatePost(@PathVariable String roomId, @PathVariable String postId,   @RequestBody EditPostDto editPostDto, @AuthenticationPrincipal UserDetails userDetails){
+        try{
+            postService.editPost(roomId, postId, editPostDto, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Post updated successfully"));
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }

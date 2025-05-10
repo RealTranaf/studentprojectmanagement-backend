@@ -59,4 +59,14 @@ public class UserController {
 
         return ResponseEntity.ok(userList);
     }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<?> getUser(@PathVariable String username){
+        try{
+            Optional<User> user = userRepository.findByUsername(username);
+            return ResponseEntity.ok(new UserDetailResponse(user.get()));
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body("You are not logged in");
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.ld.springsecurity.service;
 
 import com.ld.springsecurity.dto.CreateCommentDto;
+import com.ld.springsecurity.dto.EditCommentDto;
 import com.ld.springsecurity.model.Comment;
 import com.ld.springsecurity.model.Post;
 import com.ld.springsecurity.model.User;
@@ -61,6 +62,41 @@ public class CommentService {
         if (optionalComment.isPresent()){
             Comment comment = optionalComment.get();
             return comment;
+        }
+        else {
+            throw new RuntimeException("Comment not found");
+        }
+    }
+    public void deleteComment(String postId, String commentId, String username){
+        Optional<Comment> optionalComment = commentRepository.findById(commentId);
+        if (optionalComment.isPresent()){
+            Comment comment = optionalComment.get();
+            if (!comment.getPost().getId().equals(postId)){
+                throw new RuntimeException("Comment does not belong to the specified post");
+            }
+            if (!comment.getAuthor().getUsername().equals(username)) {
+                throw new RuntimeException("You are not authorized to delete this comment");
+            }
+            commentRepository.delete(comment);
+        }
+        else {
+            throw new RuntimeException("Comment not found");
+        }
+    }
+
+    public void editComment(String postId, String commentId, EditCommentDto editCommentDto, String username) {
+        Optional<Comment> optionalComment = commentRepository.findById(commentId);
+        if (optionalComment.isPresent()){
+            Comment comment = optionalComment.get();
+            if (!comment.getPost().getId().equals(postId)) {
+                throw new RuntimeException("Comment does not belong to the specified post");
+            }
+
+            if (!comment.getAuthor().getUsername().equals(username)) {
+                throw new RuntimeException("You are not authorized to edit this comment");
+            }
+            comment.setContent(editCommentDto.getContent());
+            commentRepository.save(comment);
         }
         else {
             throw new RuntimeException("Comment not found");

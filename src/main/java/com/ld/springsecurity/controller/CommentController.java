@@ -1,6 +1,7 @@
 package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.dto.CreateCommentDto;
+import com.ld.springsecurity.dto.EditCommentDto;
 import com.ld.springsecurity.model.Comment;
 import com.ld.springsecurity.model.Post;
 import com.ld.springsecurity.response.CommentListResponse;
@@ -60,4 +61,23 @@ public class CommentController {
         }
     }
 
+    @PutMapping("/{commentId}")
+    public ResponseEntity<?> updateComment(@PathVariable String postId, @PathVariable String commentId, @RequestBody EditCommentDto editCommentDto, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            commentService.editComment(postId, commentId, editCommentDto, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Comment updated successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable String postId, @PathVariable String commentId, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            commentService.deleteComment(postId, commentId, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Comment deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
 }
