@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -36,7 +37,8 @@ public class Post {
     @CreationTimestamp
     private LocalDateTime createdTime;
 
-
+    @ElementCollection
+    private List<String> fileUrls = new ArrayList<>();
 
     public Post(String content, User author, Room room) {
         this.content = content;

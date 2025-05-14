@@ -1,6 +1,5 @@
 package com.ld.springsecurity.service;
 
-import com.ld.springsecurity.dto.CreatePostDto;
 import com.ld.springsecurity.dto.EditPostDto;
 import com.ld.springsecurity.model.Post;
 import com.ld.springsecurity.model.Room;
@@ -15,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,10 +27,13 @@ public class PostService {
 
     private final RoomRepository roomRepository;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository, RoomRepository roomRepository) {
+    private final FileStorageService fileStorageService;
+
+    public PostService(PostRepository postRepository, UserRepository userRepository, RoomRepository roomRepository, FileStorageService fileStorageService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     public Page<Post> getPostsFromRoom(String roomId, int page, int size){
@@ -45,7 +48,7 @@ public class PostService {
         }
     }
 
-    public void createPost(String roomId, CreatePostDto input, String author) {
+    public void createPost(String roomId, String content, List<String> fileUrls, String author) {
         Optional<User> optionalUser = userRepository.findByUsername(author);
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
         if (optionalUser.isPresent() && optionalRoom.isPresent()){
@@ -53,8 +56,9 @@ public class PostService {
             Room room = optionalRoom.get();
             Post post = new Post();
             post.setAuthor(user);
-            post.setContent(input.getContent());
+            post.setContent(content);
             post.setRoom(room);
+            post.setFileUrls(fileUrls);
             postRepository.save(post);
         } else {
             throw new RuntimeException("User or room not found");
@@ -81,13 +85,18 @@ public class PostService {
             if (!post.getAuthor().getUsername().equals(username)) {
                 throw new RuntimeException("You are not authorized to delete this post");
             }
+            if (post.getFileUrls() != null) {
+                for (String fileUrl : post.getFileUrls()) {
+                    fileStorageService.deleteFile(fileUrl);
+                }
+            }
             postRepository.delete(post);
         }
         else {
             throw new RuntimeException("Post not found");
         }
     }
-    public void editPost(String roomId, String postId, EditPostDto editPostDto, String username){
+    public void editPost(String roomId, String postId, String content, List<String> newFileUrls, List<String> filesToDelete , String username){
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isPresent()){
             Post post = optionalPost.get();
@@ -97,13 +106,26 @@ public class PostService {
             if (!post.getAuthor().getUsername().equals(username)) {
                 throw new RuntimeException("You are not authorized to edit this post");
             }
-//            System.out.println("Username: " + username);
-//            System.out.println("Post Author: " + post.getAuthor());
-            post.setContent(editPostDto.getContent());
+
+            if (filesToDelete != null) {
+                for (String fileUrl : filesToDelete){
+                    fileStorageService.deleteFile(fileUrl);
+                }
+            }
+
+            List<String> updatedFileUrls = new ArrayList<>(post.getFileUrls());
+            if (newFileUrls != null) {
+                updatedFileUrls.addAll(newFileUrls);
+            }
+            updatedFileUrls.removeAll(filesToDelete);
+            post.setContent(content);
+            post.setFileUrls(updatedFileUrls);
             postRepository.save(post);
         }
         else {
             throw new RuntimeException("Post not found");
         }
     }
+
+
 }
