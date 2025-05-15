@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**", "/public").permitAll()
+                        .requestMatchers("/auth/**", "/public", "/files").permitAll()
 
                         .requestMatchers("/admin/**").hasAnyRole(Role.ADMIN.name())
                         .requestMatchers("/teacher/**").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())

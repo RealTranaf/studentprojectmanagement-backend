@@ -33,16 +33,6 @@ public class CommentController {
         this.postService = postService;
     }
 
-//    @PostMapping("/create")
-//    public ResponseEntity<?> createComment(@PathVariable String postId, @RequestBody CreateCommentDto createCommentDto, @AuthenticationPrincipal UserDetails userDetails){
-//        try{
-//            commentService.createComment(postId, createCommentDto, userDetails.getUsername());
-//            return ResponseEntity.ok(new MessageResponse("Comment created successfully"));
-//        } catch (RuntimeException e){
-//            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
-//        }
-//    }
-
     @PostMapping("/create")
     public ResponseEntity<?> createComment(@PathVariable String postId,
                                            @RequestParam("content") String content,

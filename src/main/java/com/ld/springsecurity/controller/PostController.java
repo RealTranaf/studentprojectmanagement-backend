@@ -34,18 +34,9 @@ public class PostController {
         this.fileStorageService = fileStorageService;
     }
 
-//    @PostMapping("/create")
-//    public ResponseEntity<?> createPost(@PathVariable String roomId, @RequestBody CreatePostDto createPostDto, @AuthenticationPrincipal   UserDetails userDetails){
-//        try{
-//            postService.createPost(roomId, createPostDto, userDetails.getUsername());
-//            return ResponseEntity.ok(new MessageResponse("Post created successfully"));
-//        } catch (RuntimeException e){
-//            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
-//        }
-//    }
-
     @PostMapping("/create")
     public ResponseEntity<?> createPost(@PathVariable String roomId,
+                                        @RequestParam("title") String title,
                                         @RequestParam("content") String content,
                                         @RequestParam(value = "files", required = false) List<MultipartFile> files,
                                         @AuthenticationPrincipal UserDetails userDetails){
@@ -60,7 +51,7 @@ public class PostController {
                     fileUrls.add(fileUrl);
                 }
             }
-            postService.createPost(roomId, content, fileUrls, userDetails.getUsername());
+            postService.createPost(roomId, title, content, fileUrls, userDetails.getUsername());
             return ResponseEntity.ok(new MessageResponse("Post created successfully"));
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
@@ -98,22 +89,13 @@ public class PostController {
     @PutMapping("/{postId}")
     public ResponseEntity<?> updatePost(@PathVariable String roomId,
                                         @PathVariable String postId,
+                                        @RequestParam("title") String title,
                                         @RequestParam("content") String content,
                                         @RequestParam(value = "files", required = false) List<MultipartFile> files,
                                         @RequestParam(value = "filesToDelete", required = false) List<String> filesToDelete,
                                         @AuthenticationPrincipal UserDetails userDetails){
         try{
-            List<String> newFileUrls = new ArrayList<>();
-            if (files != null && !files.isEmpty()){
-                for (MultipartFile file : files) {
-                    if (file.getSize() > 100 * 1024 * 1024) {
-                        throw new RuntimeException("File size exceeds the 100MB limit.");
-                    }
-                    String fileUrl = fileStorageService.storeFile(file);
-                    newFileUrls.add(fileUrl);
-                }
-            }
-            postService.editPost(roomId, postId, content, newFileUrls, filesToDelete, userDetails.getUsername());
+            postService.editPost(roomId, postId, title, content, files, filesToDelete, userDetails.getUsername());
             return ResponseEntity.ok(new MessageResponse("Post updated successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

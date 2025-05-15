@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 public class PostListResponse {
     private String id;
+    private String title;
     private String content;
     private String author;
     private LocalDateTime createdTime;
@@ -18,6 +19,7 @@ public class PostListResponse {
 
     public PostListResponse(Post post){
         this.id = post.getId();
+        this.title = post.getTitle();
         this.content = post.getContent();
         this.author = post.getAuthor().getUsername();
         this.createdTime = post.getCreatedTime();
