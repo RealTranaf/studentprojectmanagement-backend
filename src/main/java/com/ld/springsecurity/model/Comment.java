@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,6 +33,9 @@ public class Comment {
 
     @CreationTimestamp
     private LocalDateTime createdTime;
+
+    @ElementCollection
+    private List<String> fileUrls = new ArrayList<>();
 
     public Comment(String content, User author, Post post) {
         this.content = content;

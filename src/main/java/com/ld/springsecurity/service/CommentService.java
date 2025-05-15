@@ -1,6 +1,5 @@
 package com.ld.springsecurity.service;
 
-import com.ld.springsecurity.dto.CreateCommentDto;
 import com.ld.springsecurity.dto.EditCommentDto;
 import com.ld.springsecurity.model.Comment;
 import com.ld.springsecurity.model.Post;
@@ -13,7 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,10 +26,13 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
 
-    public CommentService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository) {
+    private final FileStorageService fileStorageService;
+
+    public CommentService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository, FileStorageService fileStorageService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.fileStorageService = fileStorageService;
     }
     public Page<Comment> getCommentsFromPost(String postId, int page, int size){
         Optional<Post> optionalPost = postRepository.findById(postId);
@@ -41,16 +46,30 @@ public class CommentService {
         }
     }
 
-    public void createComment(String postId, CreateCommentDto input, String author) {
+    public void createComment(String postId, String content, List<MultipartFile> files, String author) {
         Optional<User> optionalUser = userRepository.findByUsername(author);
         Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalUser.isPresent()){
+        if (optionalUser.isPresent() && optionalPost.isPresent()){
             User user = optionalUser.get();
             Post post = optionalPost.get();
             Comment comment = new Comment();
-            comment.setContent(input.getContent());
+            comment.setContent(content);
             comment.setAuthor(user);
             comment.setPost(post);
+
+            List<String> fileUrls = new ArrayList<>();
+            if (files != null){
+                for (MultipartFile file : files) {
+                    if (file.getSize() > 100 * 1024 * 1024) {
+                        throw new RuntimeException("File " + file.getOriginalFilename() + " exceeds the 100MB limit.");
+                    }
+                    String url = fileStorageService.storeFile(file);
+                    fileUrls.add(url);
+                }
+            }
+
+            comment.setFileUrls(fileUrls);
+
             commentRepository.save(comment);
         } else {
             throw new RuntimeException("User or post not found");
@@ -77,6 +96,11 @@ public class CommentService {
             if (!comment.getAuthor().getUsername().equals(username)) {
                 throw new RuntimeException("You are not authorized to delete this comment");
             }
+            if (comment.getFileUrls() != null) {
+                for (String fileUrl : comment.getFileUrls()) {
+                    fileStorageService.deleteFile(fileUrl);
+                }
+            }
             commentRepository.delete(comment);
         }
         else {
@@ -84,7 +108,7 @@ public class CommentService {
         }
     }
 
-    public void editComment(String postId, String commentId, EditCommentDto editCommentDto, String username) {
+    public void editComment(String postId, String commentId, String content, List<MultipartFile> files, List<String> filesToDelete, String username) {
         Optional<Comment> optionalComment = commentRepository.findById(commentId);
         if (optionalComment.isPresent()){
             Comment comment = optionalComment.get();
@@ -95,7 +119,22 @@ public class CommentService {
             if (!comment.getAuthor().getUsername().equals(username)) {
                 throw new RuntimeException("You are not authorized to edit this comment");
             }
-            comment.setContent(editCommentDto.getContent());
+            comment.setContent(content);
+            if (filesToDelete != null) {
+                for (String fileUrl : filesToDelete) {
+                    fileStorageService.deleteFile(fileUrl);
+                    comment.getFileUrls().remove(fileUrl);
+                }
+            }
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file.getSize() > 100 * 1024 * 1024) {
+                        throw new RuntimeException("File " + file.getOriginalFilename() + " exceeds the 100MB limit.");
+                    }
+                    String url = fileStorageService.storeFile(file);
+                    comment.getFileUrls().add(url);
+                }
+            }
             commentRepository.save(comment);
         }
         else {

@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,10 +33,23 @@ public class CommentController {
         this.postService = postService;
     }
 
+//    @PostMapping("/create")
+//    public ResponseEntity<?> createComment(@PathVariable String postId, @RequestBody CreateCommentDto createCommentDto, @AuthenticationPrincipal UserDetails userDetails){
+//        try{
+//            commentService.createComment(postId, createCommentDto, userDetails.getUsername());
+//            return ResponseEntity.ok(new MessageResponse("Comment created successfully"));
+//        } catch (RuntimeException e){
+//            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+//        }
+//    }
+
     @PostMapping("/create")
-    public ResponseEntity<?> createComment(@PathVariable String postId, @RequestBody CreateCommentDto createCommentDto, @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<?> createComment(@PathVariable String postId,
+                                           @RequestParam("content") String content,
+                                           @RequestParam(value = "files", required = false) List<MultipartFile> files,
+                                           @AuthenticationPrincipal UserDetails userDetails){
         try{
-            commentService.createComment(postId, createCommentDto, userDetails.getUsername());
+            commentService.createComment(postId, content, files, userDetails.getUsername());
             return ResponseEntity.ok(new MessageResponse("Comment created successfully"));
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
@@ -62,9 +76,14 @@ public class CommentController {
     }
 
     @PutMapping("/{commentId}")
-    public ResponseEntity<?> updateComment(@PathVariable String postId, @PathVariable String commentId, @RequestBody EditCommentDto editCommentDto, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> updateComment(@PathVariable String postId,
+                                           @PathVariable String commentId,
+                                           @RequestParam("content") String content,
+                                           @RequestParam(value = "files", required = false) List<MultipartFile> files,
+                                           @RequestParam(value = "filesToDelete", required = false) List<String> filesToDelete,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            commentService.editComment(postId, commentId, editCommentDto, userDetails.getUsername());
+            commentService.editComment(postId, commentId, content, files, filesToDelete, userDetails.getUsername());
             return ResponseEntity.ok(new MessageResponse("Comment updated successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

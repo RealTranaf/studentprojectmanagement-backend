@@ -52,6 +52,7 @@ public class RoomService {
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
         if (optionalRoom.isPresent()){
             Room room = optionalRoom.get();
+
             return room;
         }
         else {
