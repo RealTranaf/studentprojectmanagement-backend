@@ -2,6 +2,7 @@ package com.ld.springsecurity.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -38,11 +39,15 @@ public class WeeklyReportSubmission {
 
     private LocalDateTime gradedAt;
 
+    @ColumnDefault("false")
+    private boolean isLate;
+
     public WeeklyReportSubmission(WeeklyReportPost reportPost, User student, String content, LocalDateTime submittedAt, List<String> fileUrls) {
         this.reportPost = reportPost;
         this.student = student;
         this.content = content;
         this.submittedAt = submittedAt;
         this.fileUrls = fileUrls;
+        this.isLate = false;
     }
 }

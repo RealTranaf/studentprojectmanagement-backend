@@ -2,7 +2,7 @@ package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.model.Post;
 import com.ld.springsecurity.response.MessageResponse;
-import com.ld.springsecurity.response.PostListResponse;
+import com.ld.springsecurity.response.PostResponse;
 import com.ld.springsecurity.service.FileStorageService;
 import com.ld.springsecurity.service.PostService;
 import com.ld.springsecurity.service.RoomService;
@@ -64,7 +64,7 @@ public class PostController {
                                       @RequestParam(defaultValue = "5") int size){
         try{
             Page<Post> postList = postService.getPostsFromRoom(roomId, page, size);
-            List<PostListResponse> postListResponse = postList.stream().map(PostListResponse::new).collect(Collectors.toList());
+            List<PostResponse> postListResponse = postList.stream().map(PostResponse::new).collect(Collectors.toList());
 
             Map<String, Object> response = new HashMap<>();
             response.put("posts", postListResponse);

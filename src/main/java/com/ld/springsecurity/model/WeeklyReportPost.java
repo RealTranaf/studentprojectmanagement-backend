@@ -2,6 +2,7 @@ package com.ld.springsecurity.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
@@ -37,6 +38,9 @@ public class WeeklyReportPost {
 
     @ElementCollection
     private List<String> fileUrls = new ArrayList<>();
+
+    @ColumnDefault("false")
+    private boolean isExpired;
 
     public WeeklyReportPost(String title, String content, LocalDateTime deadline, Room room, User author) {
         this.title = title;

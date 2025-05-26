@@ -2,12 +2,11 @@ package com.ld.springsecurity.controller;
 
 import com.ld.springsecurity.dto.AddUsersToRoomDto;
 import com.ld.springsecurity.dto.CreateRoomDto;
-import com.ld.springsecurity.dto.RemoveUsersFromRoomDto;
 import com.ld.springsecurity.model.Room;
 import com.ld.springsecurity.response.CreateRoomResponse;
 import com.ld.springsecurity.response.MessageResponse;
 import com.ld.springsecurity.response.RoomDetailResponse;
-import com.ld.springsecurity.response.RoomListResponse;
+import com.ld.springsecurity.response.RoomResponse;
 import com.ld.springsecurity.service.RoomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,7 +39,7 @@ public class RoomController{
     public ResponseEntity<?> showRoomList(@AuthenticationPrincipal UserDetails userDetails){
         try{
             List<Room> roomList = roomService.getRoomsByUser(userDetails.getUsername());
-            List<RoomListResponse> roomListResponse = roomList.stream().map(RoomListResponse::new).collect(Collectors.toList());
+            List<RoomResponse> roomListResponse = roomList.stream().map(RoomResponse::new).collect(Collectors.toList());
             return ResponseEntity.ok(roomListResponse);
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

@@ -1,12 +1,8 @@
 package com.ld.springsecurity.controller;
 
-import com.ld.springsecurity.dto.CreateCommentDto;
-import com.ld.springsecurity.dto.EditCommentDto;
 import com.ld.springsecurity.model.Comment;
-import com.ld.springsecurity.model.Post;
-import com.ld.springsecurity.response.CommentListResponse;
+import com.ld.springsecurity.response.CommentResponse;
 import com.ld.springsecurity.response.MessageResponse;
-import com.ld.springsecurity.response.PostListResponse;
 import com.ld.springsecurity.service.CommentService;
 import com.ld.springsecurity.service.PostService;
 import org.springframework.data.domain.Page;
@@ -52,7 +48,7 @@ public class CommentController {
                                          @RequestParam(defaultValue = "5") int size){
         try{
             Page<Comment> commentList = commentService.getCommentsFromPost(postId, page, size);
-            List<CommentListResponse> commentListResponse = commentList.stream().map(CommentListResponse::new).collect(Collectors.toList());
+            List<CommentResponse> commentListResponse = commentList.stream().map(CommentResponse::new).collect(Collectors.toList());
 
             Map<String, Object> response = new HashMap<>();
             response.put("comments", commentListResponse);

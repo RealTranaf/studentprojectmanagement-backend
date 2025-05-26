@@ -6,11 +6,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RoomListResponse {
+public class RoomResponse {
     private String id;
     private String name;
     private String createdBy;
-    public RoomListResponse(Room room){
+    public RoomResponse(Room room){
         this.id = room.getId();
         this.name = room.getName();
         this.createdBy = room.getCreatedBy().getUsername();

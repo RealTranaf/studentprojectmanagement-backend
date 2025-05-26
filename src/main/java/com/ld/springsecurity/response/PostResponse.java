@@ -1,6 +1,6 @@
 package com.ld.springsecurity.response;
 
-import com.ld.springsecurity.model.WeeklyReportPost;
+import com.ld.springsecurity.model.Post;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,22 +9,20 @@ import java.util.List;
 
 @Getter
 @Setter
-public class WeeklyReportPostListResponse {
+public class PostResponse {
     private String id;
     private String title;
     private String content;
-    private LocalDateTime deadline;
-    private LocalDateTime createdAt;
     private String author;
+    private LocalDateTime createdTime;
     private List<String> fileUrls;
 
-    public WeeklyReportPostListResponse(WeeklyReportPost post) {
+    public PostResponse(Post post){
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.deadline = post.getDeadline();
-        this.createdAt = post.getCreatedAt();
         this.author = post.getAuthor().getUsername();
+        this.createdTime = post.getCreatedTime();
         this.fileUrls = post.getFileUrls();
     }
 }

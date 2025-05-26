@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface WeeklyReportPostRepository extends JpaRepository<WeeklyReportPost, String> {
     List<WeeklyReportPost> findByRoomId(String roomId);
+    List<WeeklyReportPost> findByRoomIdOrderByDeadlineAsc(String roomId);
 }
