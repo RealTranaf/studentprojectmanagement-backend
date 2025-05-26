@@ -83,11 +83,12 @@ public class WeeklyReportController {
                                       @PathVariable String reportPostId,
                                       @RequestParam("title") String title,
                                       @RequestParam("content") String content,
+                                      @RequestParam("deadline") String deadline,
                                       @RequestParam(value = "files", required = false) List<MultipartFile> files,
                                       @RequestParam(value = "filesToDelete", required = false) List<String> filesToDelete,
                                       @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            weeklyReportService.editPost(roomId, reportPostId, userDetails.getUsername(), title, content, files, filesToDelete);
+            weeklyReportService.editPost(roomId, reportPostId, userDetails.getUsername(), title, content, LocalDateTime.parse(deadline), files, filesToDelete);
             return ResponseEntity.ok(new MessageResponse("Post edited successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

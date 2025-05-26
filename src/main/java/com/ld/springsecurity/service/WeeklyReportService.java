@@ -69,7 +69,7 @@ public class WeeklyReportService {
         }
     }
 
-    public void editPost(String roomId, String reportPostId, String username, String title, String content, List<MultipartFile> files, List<String> filesToDelete) {
+    public void editPost(String roomId, String reportPostId, String username, String title, String content, LocalDateTime deadline, List<MultipartFile> files, List<String> filesToDelete) {
         Optional<WeeklyReportPost> optionalPost = weeklyReportPostRepository.findById(reportPostId);
         if (optionalPost.isPresent()) {
             WeeklyReportPost post = optionalPost.get();
@@ -98,12 +98,13 @@ public class WeeklyReportService {
 
             post.setTitle(title);
             post.setContent(content);
-//            LocalDateTime now = LocalDateTime.now();
-//            if (deadline != null && now.isAfter(deadline)){
-//                post.setExpired(true);
-//            } else {
-//                post.setExpired(false);
-//            }
+            post.setDeadline(deadline);
+            LocalDateTime now = LocalDateTime.now();
+            if (deadline != null && now.isAfter(deadline)){
+                post.setExpired(true);
+            } else {
+                post.setExpired(false);
+            }
             weeklyReportPostRepository.save(post);
         } else {
             throw new RuntimeException("Post not found");
@@ -224,12 +225,17 @@ public class WeeklyReportService {
                         fileStorageService.deleteFile(fileUrl);
                     }
                 }
+
                 List<String> newFileUrls = new ArrayList<>();
                 if (files != null) {
                     for (MultipartFile file : files) {
+                        if (file.getSize() > 100 * 1024 * 1024) {
+                            throw new RuntimeException("File " + file.getOriginalFilename() + " exceeds the 100MB limit.");
+                        }
                         newFileUrls.add(fileStorageService.storeFile(file));
                     }
                 }
+
                 existingSub.setContent(content);
                 existingSub.setFileUrls(newFileUrls);
                 existingSub.setGrade(null);
