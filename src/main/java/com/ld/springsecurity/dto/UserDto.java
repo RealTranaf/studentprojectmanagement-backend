@@ -2,7 +2,6 @@ package com.ld.springsecurity.dto;
 
 import com.ld.springsecurity.model.Role;
 import com.ld.springsecurity.model.User;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

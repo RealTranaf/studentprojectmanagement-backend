@@ -1,6 +1,5 @@
 package com.ld.springsecurity.service;
 
-import com.ld.springsecurity.dto.EditCommentDto;
 import com.ld.springsecurity.model.Comment;
 import com.ld.springsecurity.model.Post;
 import com.ld.springsecurity.model.User;
