@@ -40,12 +40,25 @@ public class TopicController {
         }
     }
 
+    @GetMapping("/non-custom")
+    public ResponseEntity<?> getNonCustomTopics() {
+        try {
+            List<Topic> topics = topicService.getNonCustomTopics();
+            List<TopicResponse> responses = topics.stream().map(TopicResponse::new).collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("topics", responses);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
     @PostMapping("/select")
     public ResponseEntity<?> selectExistingTopic(@PathVariable String roomId,
                                                  @RequestParam String topicId,
                                                  @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            StudentTopicSelection selection = topicService.selectExistingTopic(userDetails.getUsername(), topicId, roomId);
+            topicService.selectExistingTopic(userDetails.getUsername(), topicId, roomId);
             return ResponseEntity.ok(new MessageResponse("Selected successfully"));
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
@@ -59,8 +72,22 @@ public class TopicController {
                                                @RequestParam(value = "files", required = false) List<MultipartFile> files,
                                                @AuthenticationPrincipal UserDetails userDetails ) {
         try {
-            StudentTopicSelection selection = topicService.submitCustomTopic(userDetails.getUsername(), title, description, files, roomId);
+            topicService.submitCustomTopic(userDetails.getUsername(), title, description, files, roomId);
             return ResponseEntity.ok(new MessageResponse("Submitted successfully"));
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/teacher")
+    public ResponseEntity<?> submitTopicTeacher(@PathVariable String roomId,
+                                                @RequestParam String title,
+                                                @RequestParam String description,
+                                                @RequestParam(value = "files", required = false) List<MultipartFile> files,
+                                                @AuthenticationPrincipal UserDetails userDetails ) {
+        try {
+            topicService.submitTopicTeacher(roomId, title, description, files, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Teacher topic added successfully"));
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
@@ -73,6 +100,19 @@ public class TopicController {
             StudentTopicSelection selection = topicService.getStudentSelection(userDetails.getUsername(), roomId);
             StudentTopicSelectionResponse selected = new StudentTopicSelectionResponse(selection);
             return ResponseEntity.ok(selected);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/selections")
+    public ResponseEntity<?> getAllStudentsSelections(@PathVariable String roomId) {
+        try {
+            List<StudentTopicSelection> selectionList = topicService.getAllStudentSelections(roomId);
+            List<StudentTopicSelectionResponse> responses = selectionList.stream().map(StudentTopicSelectionResponse::new).collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("selections", responses);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }

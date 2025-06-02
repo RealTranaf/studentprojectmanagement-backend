@@ -27,5 +27,5 @@ public class Topic {
     @JoinColumn(name = "proposed_by_id")
     private User proposedBy;
 
-//    private boolean isCustom;
+    private boolean isCustom;
 }

@@ -47,6 +47,11 @@ public class SecurityConfig {
                         .requestMatchers("/rooms/create").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
                         .requestMatchers("/rooms/{roomId}/add-users").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
                         .requestMatchers("/rooms/{roomId}/remove-users").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/{roomId}/topics/teacher").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/{roomId}/weekly-reports/create").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/{roomId}/weekly-reports/delete").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/{roomId}/weekly-reports/edit").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
+                        .requestMatchers("/rooms/{roomId}/weekly-reports/submissions/{submissionId}/grade").hasAnyRole(Role.ADMIN.name(), Role.TEACHER.name())
 
                         .anyRequest().authenticated()
                 )
