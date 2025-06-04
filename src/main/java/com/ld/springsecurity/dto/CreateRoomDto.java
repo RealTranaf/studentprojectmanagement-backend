@@ -11,5 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CreateRoomDto {
     private String name;
-//    private String createdBy;
+    private String type;
 }

@@ -9,9 +9,11 @@ import lombok.Setter;
 public class RoomResponse {
     private String id;
     private String name;
+    private String type;
     private String createdBy;
     public RoomResponse(Room room){
         this.id = room.getId();
+        this.type = room.getType().getDisplayName();
         this.name = room.getName();
         this.createdBy = room.getCreatedBy().getUsername();
     }

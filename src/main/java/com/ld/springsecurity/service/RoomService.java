@@ -3,6 +3,7 @@ package com.ld.springsecurity.service;
 import com.ld.springsecurity.dto.CreateRoomDto;
 import com.ld.springsecurity.model.Room;
 import com.ld.springsecurity.model.User;
+import com.ld.springsecurity.model.ClassType;
 import com.ld.springsecurity.repo.RoomRepository;
 import com.ld.springsecurity.repo.UserRepository;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,6 @@ public class RoomService {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()){
             User user = optionalUser.get();
-//            System.out.println(user.getRooms());
             return new ArrayList<>(user.getRooms());
         }
         else {
@@ -39,6 +39,12 @@ public class RoomService {
             User teacher = optionalUser.get();
             Room room = new Room();
             room.setName(input.getName());
+            try {
+                ClassType type = ClassType.valueOf(input.getType());
+                room.setType(type);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid room type. Must be CLASS_1, CLASS_2, CLASS_3, or CLASS_F.");
+            }
             room.setCreatedBy(teacher);
             room.getUsers().add(teacher);
             return roomRepository.save(room);

@@ -24,12 +24,13 @@ public class Room {
     private String name;
 
     @ManyToOne
-//    @JsonBackReference
     @JoinColumn(name = "user_id")
     private User createdBy;
 
+    @Enumerated(EnumType.STRING)
+    private ClassType type;
+
     @ManyToMany
-//    @JsonBackReference
     @JoinTable(
             name = "room_users",
             joinColumns = @JoinColumn(name = "room_id"),
