@@ -57,6 +57,18 @@ public class RoomController{
         }
     }
 
+    @PutMapping("/{roomId}")
+    public ResponseEntity<?> updateRoom(@PathVariable String roomId,
+                                        @RequestBody CreateRoomDto createRoomDto,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            roomService.updateRoom(roomId, createRoomDto, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Room updated successfully!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
     @PostMapping("/{roomId}/add-users")
     public ResponseEntity<?> addUserToRoom(@PathVariable String roomId, @RequestBody AddUsersToRoomDto addUsersToRoomDto){
         try{

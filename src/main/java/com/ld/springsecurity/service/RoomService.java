@@ -97,4 +97,25 @@ public class RoomService {
             throw new RuntimeException("Room not found!");
         }
     }
+    public void updateRoom(String roomId, CreateRoomDto input, String username) {
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalRoom.isPresent() && optionalUser.isPresent()) {
+            Room room = optionalRoom.get();
+            User user = optionalUser.get();
+            if (!room.getCreatedBy().getUsername().equals(username)) {
+                throw new RuntimeException("You are not the author of this poll");
+            }
+            room.setName(input.getName());
+            try {
+                ClassType type = ClassType.valueOf(input.getType());
+                room.setType(type);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid room type. Must be CLASS_1, CLASS_2, CLASS_3, or CLASS_F.");
+            }
+            roomRepository.save(room);
+        } else {
+            throw new RuntimeException("Room or user not found!");
+        }
+    }
 }
