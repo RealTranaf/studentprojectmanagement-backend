@@ -53,6 +53,7 @@ public class TopicService {
             selection.setStudent(student);
             selection.setTopic(topic);
             selection.setRoom(room);
+            selection.setVerified(false);
             selection.setCustom(false);
             studentTopicSelectionRepository.save(selection);
         } else {
@@ -89,6 +90,7 @@ public class TopicService {
             selection.setStudent(student);
             selection.setTopic(savedTopic);
             selection.setRoom(room);
+            selection.setVerified(false);
             selection.setCustom(true);
             studentTopicSelectionRepository.save(selection);
         } else {
@@ -141,6 +143,24 @@ public class TopicService {
             }
         } else {
             throw new RuntimeException("User or room not found");
+        }
+    }
+
+    public void verifySelection (String roomId, String selectionId, String username) {
+        Optional<StudentTopicSelection> optionalSelection = studentTopicSelectionRepository.findById(selectionId);
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        if (optionalUser.isPresent() && optionalSelection.isPresent()) {
+            StudentTopicSelection selection = optionalSelection.get();
+            User teacher = optionalUser.get();
+            Room room = optionalRoom.get();
+            if (!room.getCreatedBy().getUsername().equals(username)) {
+                throw new RuntimeException("You are not permitted to verify this selection");
+            }
+            selection.setVerified(true);
+            studentTopicSelectionRepository.save(selection);
+        } else {
+            throw new RuntimeException("Selection or user not found");
         }
     }
 

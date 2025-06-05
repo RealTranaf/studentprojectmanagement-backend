@@ -193,7 +193,7 @@ public class WeeklyReportController {
             headerStyle.setFont(font);
 
             Row header = sheet.createRow(0);
-            String headers[] = {"Student", "Status", "Is Late?", "Report", "Files", "Grade", "Note"};
+            String headers[] = {"Student", "Status", "Is Late?", "Report", "Grade", "Note"};
             for (int i = 0; i < headers.length; i++){
                 Cell cell = header.createCell(i);
                 cell.setCellValue(headers[i]);
@@ -230,7 +230,6 @@ public class WeeklyReportController {
                         sub != null ? "Turned in " + sub.getSubmittedAt() : "Not Turned In",
                         sub != null && sub.getContent() != null ? sub.getContent() : "-",
                         isLateStatus,
-                        sub != null && sub.getFileUrls() != null ? String.join(", ", sub.getFileUrls()) : "-",
                         sub != null && sub.getGrade() != null ? sub.getGrade() : "-",
                         sub != null && sub.getTeacherNote() != null ? sub.getTeacherNote() : "-"
                 };

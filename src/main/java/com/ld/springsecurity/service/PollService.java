@@ -96,6 +96,35 @@ public class PollService {
             if (!poll.getCreatedBy().getUsername().equals(username)) {
                 throw new RuntimeException("You are not the author of this poll");
             }
+
+            List<String> oldOptions = poll.getOptions();
+            List<Integer> remove = new ArrayList<>();
+            for (int i = 0; i < oldOptions.size(); i++) {
+                String oldOption = oldOptions.get(i);
+                if (options.size() <= i || !options.get(i).equals(oldOption)) {
+                    remove.add(i);
+                }
+            }
+
+            if (!remove.isEmpty()) {
+                List<PollVote> pollVotes = pollVoteRepository.findByPoll_Id(pollId);
+                for (PollVote vote : pollVotes) {
+                    if (remove.contains(vote.getOptionIndex())) {
+                        pollVoteRepository.delete(vote);
+                    }
+                }
+                for (PollVote vote : pollVotes) {
+                    int shift = 0;
+                    for (int idx : remove) {
+                        if (vote.getOptionIndex() > idx) shift++;
+                    }
+                    if (shift > 0 && !remove.contains(vote.getOptionIndex())) {
+                        vote.setOptionIndex(vote.getOptionIndex() - shift);
+                        pollVoteRepository.save(vote);
+                    }
+                }
+            }
+
             poll.setTitle(title);
             poll.setDescription(description);
             poll.setDeadline(deadline);

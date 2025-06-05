@@ -118,4 +118,16 @@ public class TopicController {
         }
     }
 
+    @PatchMapping("/selections/{selectionId}/verify")
+    public ResponseEntity<?> verifyStudentSelection(@PathVariable String roomId,
+                                                    @PathVariable String selectionId,
+                                                    @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            topicService.verifySelection(roomId, selectionId, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Selection verified!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
 }

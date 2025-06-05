@@ -26,6 +26,8 @@ public class StudentTopicSelection {
     @JoinColumn(name = "room_id")
     private Room room;
 
+    private boolean isVerified;
+
     private boolean isCustom;
 
 }
