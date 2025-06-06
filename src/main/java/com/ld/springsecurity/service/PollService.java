@@ -85,6 +85,8 @@ public class PollService {
         return pollVoteRepository.findByPoll_Id(pollId);
     }
 
+
+
     public void updatePoll(String username,String pollId, String roomId, String title, String description, List<MultipartFile> files, List<String> filesToDelete, List<String> options, LocalDateTime deadline) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
@@ -176,5 +178,9 @@ public class PollService {
         } else {
             throw new RuntimeException("User/room/poll not found");
         }
+    }
+
+    public Poll getPollById(String pollId) {
+        return pollRepository.findById(pollId).get();
     }
 }

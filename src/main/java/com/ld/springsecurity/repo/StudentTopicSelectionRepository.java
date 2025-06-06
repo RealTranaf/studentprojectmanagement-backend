@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface StudentTopicSelectionRepository extends JpaRepository<StudentTopicSelection, String> {
     Optional<StudentTopicSelection> findByStudent_IdAndRoom_Id(String studentId, String roomId);
     List<StudentTopicSelection> findByRoom_Id(String roomId);
+    void deleteAllByTopic_Id(String topicId);
 }

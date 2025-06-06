@@ -8,9 +8,11 @@ import com.ld.springsecurity.repo.RoomRepository;
 import com.ld.springsecurity.repo.StudentTopicSelectionRepository;
 import com.ld.springsecurity.repo.TopicRepository;
 import com.ld.springsecurity.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -161,6 +163,67 @@ public class TopicService {
             studentTopicSelectionRepository.save(selection);
         } else {
             throw new RuntimeException("Selection or user not found");
+        }
+    }
+
+    @Transactional
+    public void deleteTopic(String roomId, String topicId, String username) {
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        Optional<Topic> optionalTopic = topicRepository.findById(topicId);
+        if (optionalRoom.isPresent() && optionalTopic.isPresent()) {
+            Room room = optionalRoom.get();
+            Topic topic = optionalTopic.get();
+            if (!topic.getProposedBy().getUsername().equals(username)) {
+                throw new RuntimeException("You are not permitted to edit this topic.");
+            }
+            if (topic.getFileUrls() != null) {
+                for (String url : topic.getFileUrls()) {
+                    fileStorageService.deleteFile(url);
+                }
+            }
+            studentTopicSelectionRepository.deleteAllByTopic_Id(topicId);
+            topicRepository.delete(topic);
+        } else {
+            throw new RuntimeException("Room or topic not found");
+        }
+    }
+
+    @Transactional
+    public void editTopic(String roomId, String topicId, String username, String title, String description, List<MultipartFile> files, List<String> filesToDelete) {
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        Optional<Topic> optionalTopic = topicRepository.findById(topicId);
+        if (optionalRoom.isPresent() && optionalTopic.isPresent()) {
+            Room room = optionalRoom.get();
+            Topic topic = optionalTopic.get();
+            if (!topic.getProposedBy().getUsername().equals(username)) {
+                throw new RuntimeException("You are not permitted to edit this topic.");
+            }
+            topic.setTitle(title);
+            topic.setDescription(description);
+
+            // Remove files
+            if (filesToDelete != null && topic.getFileUrls() != null) {
+                List<String> updatedFileUrls = new ArrayList<>(topic.getFileUrls());
+                for (String fileUrl : filesToDelete) {
+                    fileStorageService.deleteFile(fileUrl);
+                    updatedFileUrls.remove(fileUrl);
+                }
+                topic.setFileUrls(updatedFileUrls);
+            }
+
+            // Add new files
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file.getSize() > 100 * 1024 * 1024) {
+                        throw new RuntimeException("File " + file.getOriginalFilename() + " exceeds the 100MB limit.");
+                    }
+                    String url = fileStorageService.storeFile(file);
+                    topic.getFileUrls().add(url);
+                }
+            }
+            topicRepository.save(topic);
+        } else {
+            throw new RuntimeException("Room or topic not found");
         }
     }
 
