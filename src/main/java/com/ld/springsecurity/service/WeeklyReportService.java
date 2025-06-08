@@ -8,7 +8,6 @@ import com.ld.springsecurity.repo.WeeklyReportSubmissionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,8 +159,15 @@ public class WeeklyReportService {
         if (optionalUser.isPresent() && optionalWeeklyReportPost.isPresent()){
             User student = optionalUser.get();
             WeeklyReportPost post = optionalWeeklyReportPost.get();
-            WeeklyReportSubmission submission = weeklyReportSubmissionRepository.findByReportPost_IdAndStudent_Id(reportPostId, student.getId())
-                    .orElse(new WeeklyReportSubmission());
+
+            List<WeeklyReportSubmission> previousSubs = weeklyReportSubmissionRepository.findByReportPostIdAndStudent_UsernameOrderBySubmittedAtDesc(reportPostId, studentName);
+            for (WeeklyReportSubmission sub : previousSubs) {
+                if (sub.isActive()) {
+                    sub.setActive(false);
+                    weeklyReportSubmissionRepository.save(sub);
+                }
+            }
+            WeeklyReportSubmission submission = new WeeklyReportSubmission();
             submission.setReportPost(post);
             submission.setStudent(student);
             submission.setContent(content);
@@ -185,6 +191,7 @@ public class WeeklyReportService {
                 }
             }
             submission.setFileUrls(fileUrls);
+            submission.setActive(true);
             return weeklyReportSubmissionRepository.save(submission);
         } else {
             throw new RuntimeException("User or room not found");
@@ -192,78 +199,51 @@ public class WeeklyReportService {
     }
 
     public List<WeeklyReportSubmission> getSubmissions(String reportPostId) {
-        return weeklyReportSubmissionRepository.findByReportPostIdOrderBySubmittedAtAsc(reportPostId);
+        return weeklyReportSubmissionRepository.findByReportPostIdAndIsActiveTrue(reportPostId);
     }
 
-    public WeeklyReportSubmission gradeSubmission(String submissionId, String grade, String note){
+    public List<WeeklyReportSubmission> getStudentSubmissions(String roomId, String username) {
+        List<WeeklyReportPost> posts = weeklyReportPostRepository.findByRoomId(roomId);
+        List<String> postIds = posts.stream().map(WeeklyReportPost::getId).collect(Collectors.toList());
+        return weeklyReportSubmissionRepository.findByReportPostIdInAndStudent_UsernameAndIsActiveTrue(postIds, username);
+    }
+
+    public List<WeeklyReportSubmission> getStudentSubmissionsByPost(String reportPostId, String username) {
+        return weeklyReportSubmissionRepository.findByReportPostIdAndStudent_UsernameOrderBySubmittedAtDesc(reportPostId, username);
+    }
+
+    public WeeklyReportSubmission gradeSubmission(String submissionId, String grade, String note, List<MultipartFile> files){
         Optional<WeeklyReportSubmission> optionalSub = weeklyReportSubmissionRepository.findById(submissionId);
         if (optionalSub.isPresent()){
             WeeklyReportSubmission submission = optionalSub.get();
+
+            List<String> prevTeacherFiles = submission.getTeacherFileUrls();
+            if (prevTeacherFiles != null && !prevTeacherFiles.isEmpty()) {
+                for (String url : prevTeacherFiles) {
+                    fileStorageService.deleteFile(url);
+                }
+            }
+
             submission.setGrade(grade);
             submission.setTeacherNote(note);
             submission.setGradedAt(LocalDateTime.now());
+
+            List<String> teacherFileUrls = new ArrayList<>();
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file.getSize() > 100 * 1024 * 1024) {
+                        throw new RuntimeException("File " + file.getOriginalFilename() + " exceeds the 100MB limit.");
+                    }
+                    String url = fileStorageService.storeFile(file);
+                    teacherFileUrls.add(url);
+                }
+            }
+            submission.setTeacherFileUrls(teacherFileUrls);
             return weeklyReportSubmissionRepository.save(submission);
         } else {
             throw new RuntimeException("Submission not found");
         }
     }
 
-    public void resubmitReport(String roomId, String reportPostId, String username, String content, List<MultipartFile> files) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isPresent()){
-            User student = optionalUser.get();
-            Optional<WeeklyReportSubmission> optionalSub = weeklyReportSubmissionRepository.findByReportPost_IdAndStudent_Id( reportPostId, student.getId());
-            if (optionalSub.isPresent()) {
-                WeeklyReportSubmission existingSub = optionalSub.get();
-
-                if (!existingSub.getStudent().getUsername().equals(username)){
-                    throw new RuntimeException("You are not the author of this submission");
-                }
-
-                if (existingSub.getFileUrls() != null) {
-                    for (String fileUrl: existingSub.getFileUrls()) {
-                        fileStorageService.deleteFile(fileUrl);
-                    }
-                }
-
-                List<String> newFileUrls = new ArrayList<>();
-                if (files != null) {
-                    for (MultipartFile file : files) {
-                        if (file.getSize() > 100 * 1024 * 1024) {
-                            throw new RuntimeException("File " + file.getOriginalFilename() + " exceeds the 100MB limit.");
-                        }
-                        newFileUrls.add(fileStorageService.storeFile(file));
-                    }
-                }
-
-                existingSub.setContent(content);
-                existingSub.setFileUrls(newFileUrls);
-                existingSub.setGrade(null);
-                existingSub.setGradedAt(null);
-                existingSub.setTeacherNote(null);
-
-                WeeklyReportPost post = existingSub.getReportPost();
-                LocalDateTime now = LocalDateTime.now();
-                existingSub.setSubmittedAt(now);
-                if (post.getDeadline() != null && now.isAfter(post.getDeadline())){
-                    existingSub.setLate(true);
-                } else {
-                    existingSub.setLate(false);
-                }
-
-                weeklyReportSubmissionRepository.save(existingSub);
-            } else {
-                throw new RuntimeException("Sub not found");
-            }
-        } else {
-            throw new RuntimeException("User not found");
-        }
-    }
-    
-    public List<WeeklyReportSubmission> getStudentSubmissions(String roomId, String username) {
-        List<WeeklyReportPost> posts = weeklyReportPostRepository.findByRoomId(roomId);
-        List<String> postIds = posts.stream().map(WeeklyReportPost::getId).collect(Collectors.toList());
-        return weeklyReportSubmissionRepository.findByReportPostIdInAndStudent_Username(postIds, username);
-    }
 
 }

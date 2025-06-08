@@ -11,6 +11,7 @@ public class StudentTopicSelectionResponse {
     private String student;
     private TopicResponse topic;
     private String roomId;
+    private String selectedBy;
     private boolean isVerified;
     private boolean isCustom;
 
@@ -19,6 +20,7 @@ public class StudentTopicSelectionResponse {
         this.student = selection.getStudent().getUsername();
         this.topic = new TopicResponse(selection.getTopic());
         this.isVerified = selection.isVerified();
+        this.selectedBy = selection.getSelectedBy().getUsername();
         this.isCustom = selection.isCustom();
         this.roomId = selection.getRoom().getId();
     }

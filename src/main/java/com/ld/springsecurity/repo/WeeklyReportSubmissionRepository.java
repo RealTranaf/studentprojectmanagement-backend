@@ -12,9 +12,9 @@ import java.util.Optional;
 public interface WeeklyReportSubmissionRepository extends JpaRepository<WeeklyReportSubmission, String> {
     List<WeeklyReportSubmission> findByReportPostId(String reportPostId);
 
-    List<WeeklyReportSubmission> findByReportPostIdOrderBySubmittedAtAsc(String reportPostId);
+    List<WeeklyReportSubmission> findByReportPostIdAndIsActiveTrue(String reportPostId);
 
-    Optional<WeeklyReportSubmission> findByReportPost_IdAndStudent_Id(String reportPostId, String studentId);
+    List<WeeklyReportSubmission> findByReportPostIdInAndStudent_UsernameAndIsActiveTrue(List<String> postIds, String username);
 
-    List<WeeklyReportSubmission> findByReportPostIdInAndStudent_Username(List<String> postIds, String username);
+    List<WeeklyReportSubmission> findByReportPostIdAndStudent_UsernameOrderBySubmittedAtDesc(String reportPostId, String username);
 }

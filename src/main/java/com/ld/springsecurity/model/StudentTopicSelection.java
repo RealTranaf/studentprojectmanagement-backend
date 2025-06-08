@@ -26,6 +26,10 @@ public class StudentTopicSelection {
     @JoinColumn(name = "room_id")
     private Room room;
 
+    @ManyToOne
+    @JoinColumn(name = "selected_by")
+    private User selectedBy;
+
     private boolean isVerified;
 
     private boolean isCustom;

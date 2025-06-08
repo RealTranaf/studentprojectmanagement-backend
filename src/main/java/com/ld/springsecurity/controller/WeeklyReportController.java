@@ -109,20 +109,6 @@ public class WeeklyReportController {
         }
     }
 
-    @PutMapping("/{reportPostId}/create")
-    public ResponseEntity<?> resubmitReport(@PathVariable String roomId,
-                                            @PathVariable String reportPostId,
-                                            @RequestParam("content") String content,
-                                            @RequestParam(value = "files", required = false) List<MultipartFile> files,
-                                            @AuthenticationPrincipal UserDetails userDetails){
-        try {
-            weeklyReportService.resubmitReport(roomId, reportPostId, userDetails.getUsername() ,content, files);
-            return ResponseEntity.ok(new MessageResponse("Submission resubmitted successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
-        }
-    }
-
     @GetMapping("/{reportPostId}/submissions")
     public ResponseEntity<?> getSubmissions(@PathVariable String reportPostId){
         try {
@@ -146,7 +132,19 @@ public class WeeklyReportController {
             List<WeeklyReportSubmission> submissionList = weeklyReportService.getStudentSubmissions(roomId, username);
             List<WeeklyReportSubmissionResponse> responses = submissionList.stream().map(WeeklyReportSubmissionResponse::new).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
-//            System.out.println(responses.get(0).getAuthor());
+            response.put("studentSubmissions", responses);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+    @GetMapping("/{reportPostId}/student-submissions")
+    public ResponseEntity<?> getStudentSubmissionsByPost(@PathVariable String reportPostId,
+                                                         @RequestParam String username) {
+        try {
+            List<WeeklyReportSubmission> submissionList = weeklyReportService.getStudentSubmissionsByPost(reportPostId, username);
+            List<WeeklyReportSubmissionResponse> responses = submissionList.stream().map(WeeklyReportSubmissionResponse::new).collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
             response.put("studentSubmissions", responses);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -157,9 +155,10 @@ public class WeeklyReportController {
     @PostMapping("/submissions/{submissionId}/grade")
     public ResponseEntity<?> gradeSubmission(@PathVariable String submissionId,
                                              @RequestParam String grade,
-                                             @RequestParam String note){
+                                             @RequestParam String note,
+                                             @RequestParam(value = "files", required = false) List<MultipartFile> files){
         try {
-            WeeklyReportSubmission submission = weeklyReportService.gradeSubmission(submissionId, grade, note);
+            WeeklyReportSubmission submission = weeklyReportService.gradeSubmission(submissionId, grade, note, files);
             return ResponseEntity.ok(new MessageResponse("Submission graded successfully"));
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

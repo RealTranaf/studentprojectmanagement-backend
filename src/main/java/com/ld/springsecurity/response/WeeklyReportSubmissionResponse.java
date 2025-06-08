@@ -19,7 +19,9 @@ public class WeeklyReportSubmissionResponse {
     private String grade;
     private String teacherNote;
     private LocalDateTime gradedAt;
+    private List<String> teacherFileUrls;
     private boolean isLate;
+    private boolean isActive;
 
     public WeeklyReportSubmissionResponse(  WeeklyReportSubmission weeklyReportSubmission) {
         this.id = weeklyReportSubmission.getId();
@@ -31,6 +33,8 @@ public class WeeklyReportSubmissionResponse {
         this.grade = weeklyReportSubmission.getGrade();
         this.teacherNote = weeklyReportSubmission.getTeacherNote();
         this.gradedAt = weeklyReportSubmission.getGradedAt();
+        this.teacherFileUrls = weeklyReportSubmission.getTeacherFileUrls();
         this.isLate = weeklyReportSubmission.isLate();
+        this.isActive = weeklyReportSubmission.isActive();
     }
 }

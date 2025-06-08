@@ -42,12 +42,9 @@ public class WeeklyReportSubmission {
     @ColumnDefault("false")
     private boolean isLate;
 
-    public WeeklyReportSubmission(WeeklyReportPost reportPost, User student, String content, LocalDateTime submittedAt, List<String> fileUrls) {
-        this.reportPost = reportPost;
-        this.student = student;
-        this.content = content;
-        this.submittedAt = submittedAt;
-        this.fileUrls = fileUrls;
-        this.isLate = false;
-    }
+    @ColumnDefault("true")
+    private boolean isActive;
+
+    @ElementCollection
+    private List<String> teacherFileUrls = new ArrayList<>();
 }

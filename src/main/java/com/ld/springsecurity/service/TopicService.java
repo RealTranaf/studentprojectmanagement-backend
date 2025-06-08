@@ -38,7 +38,6 @@ public class TopicService {
         return topicRepository.findByIsCustomFalse();
     }
 
-
     public void selectExistingTopic(String username, String topicId, String roomId){
         Optional<User> optionalUser = userRepository.findByUsername(username);
         Optional<Topic> optionalTopic = topicRepository.findById(topicId);
@@ -57,6 +56,7 @@ public class TopicService {
             selection.setRoom(room);
             selection.setVerified(false);
             selection.setCustom(false);
+            selection.setSelectedBy(student);
             studentTopicSelectionRepository.save(selection);
         } else {
             throw new RuntimeException("User or topic not found");
@@ -94,7 +94,65 @@ public class TopicService {
             selection.setRoom(room);
             selection.setVerified(false);
             selection.setCustom(true);
+            selection.setSelectedBy(student);
             studentTopicSelectionRepository.save(selection);
+        } else {
+            throw new RuntimeException("User or room not found");
+        }
+    }
+
+    public void submitCustomTopicGroup(List<String> usernames, String title, String description, List<MultipartFile> files, String roomId, String selectedByUsername ) {
+        Optional<User> optionalSelectedBy = userRepository.findByUsername(selectedByUsername);
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        if (optionalSelectedBy.isPresent() && optionalRoom.isPresent()) {
+            User selectedBy = optionalSelectedBy.get();
+            Room room = optionalRoom.get();
+            Topic newTopic = new Topic();
+            newTopic.setTitle(title);
+            newTopic.setDescription(description);
+            newTopic.setProposedBy(selectedBy);
+            newTopic.setCustom(true);
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file.getSize() > 100 * 1024 * 1024) {
+                        throw new RuntimeException("File " + file.getOriginalFilename() + " exceeds the 100MB limit.");
+                    }
+                    String url = fileStorageService.storeFile(file);
+                    newTopic.getFileUrls().add(url);
+                }
+            }
+            Topic savedTopic = topicRepository.save(newTopic);
+
+            studentTopicSelectionRepository.findByStudent_IdAndRoom_Id(selectedBy.getId(), room.getId())
+                    .ifPresent(studentTopicSelectionRepository::delete);
+            StudentTopicSelection leadSelection = new StudentTopicSelection();
+            leadSelection.setStudent(selectedBy);
+            leadSelection.setTopic(savedTopic);
+            leadSelection.setRoom(room);
+            leadSelection.setVerified(false);
+            leadSelection.setCustom(true);
+            leadSelection.setSelectedBy(selectedBy);
+            studentTopicSelectionRepository.save(leadSelection);
+
+            for (String username : usernames) {
+                Optional<User> optionalUser = userRepository.findByUsername(username);
+                if (optionalUser.isPresent()) {
+                    User student = optionalUser.get();
+                    studentTopicSelectionRepository.findByStudent_IdAndRoom_Id(student.getId(), room.getId())
+                            .ifPresent(studentTopicSelectionRepository::delete);
+
+                    StudentTopicSelection selection = new StudentTopicSelection();
+                    selection.setStudent(student);
+                    selection.setTopic(savedTopic);
+                    selection.setRoom(room);
+                    selection.setVerified(false);
+                    selection.setCustom(savedTopic.isCustom());
+                    selection.setSelectedBy(selectedBy);
+                    studentTopicSelectionRepository.save(selection);
+                }
+            }
+
+
         } else {
             throw new RuntimeException("User or room not found");
         }
@@ -224,6 +282,47 @@ public class TopicService {
             topicRepository.save(topic);
         } else {
             throw new RuntimeException("Room or topic not found");
+        }
+    }
+
+    public void selectTopicAsGroup(List<String> usernames, String topicId, String roomId, String selectedByUsername) {
+        Optional<Topic> optionalTopic = topicRepository.findById(topicId);
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        Optional<User> optionalSelectedBy = userRepository.findByUsername(selectedByUsername);
+        if (optionalTopic.isPresent() && optionalRoom.isPresent() && optionalSelectedBy.isPresent()) {
+            Topic topic = optionalTopic.get();
+            Room room = optionalRoom.get();
+            User selectedBy = optionalSelectedBy.get();
+
+            studentTopicSelectionRepository.findByStudent_IdAndRoom_Id(selectedBy.getId(), room.getId())
+                    .ifPresent(studentTopicSelectionRepository::delete);
+            StudentTopicSelection leadSelection = new StudentTopicSelection();
+            leadSelection.setStudent(selectedBy);
+            leadSelection.setTopic(topic);
+            leadSelection.setRoom(room);
+            leadSelection.setVerified(false);
+            leadSelection.setCustom(topic.isCustom());
+            leadSelection.setSelectedBy(selectedBy);
+            studentTopicSelectionRepository.save(leadSelection);
+            for (String username : usernames) {
+                Optional<User> optionalUser = userRepository.findByUsername(username);
+                if (optionalUser.isPresent()) {
+                    User student = optionalUser.get();
+                    studentTopicSelectionRepository.findByStudent_IdAndRoom_Id(student.getId(), room.getId())
+                            .ifPresent(studentTopicSelectionRepository::delete);
+
+                    StudentTopicSelection selection = new StudentTopicSelection();
+                    selection.setStudent(student);
+                    selection.setTopic(topic);
+                    selection.setRoom(room);
+                    selection.setVerified(false);
+                    selection.setCustom(topic.isCustom());
+                    selection.setSelectedBy(selectedBy);
+                    studentTopicSelectionRepository.save(selection);
+                }
+            }
+        } else {
+            throw new RuntimeException("Topic, room, or selectedBy user not found");
         }
     }
 

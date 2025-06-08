@@ -164,6 +164,34 @@ public class TopicController {
         }
     }
 
+    @PostMapping("/custom-group")
+    public ResponseEntity<?> submitCustomTopicGroup(@PathVariable String roomId,
+                                                    @RequestParam String title,
+                                                    @RequestParam String description,
+                                                    @RequestParam(value = "files", required = false) List<MultipartFile> files,
+                                                    @RequestParam List<String> usernames,
+                                                    @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            topicService.submitCustomTopicGroup(usernames, title, description, files, roomId, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Custom group topic submitted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/select-group")
+    public ResponseEntity<?> selectTopicAsGroup(@PathVariable String roomId,
+                                                @RequestParam String topicId,
+                                                @RequestParam List<String> usernames,
+                                                @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            topicService.selectTopicAsGroup(usernames, topicId, roomId, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Group selected successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
     @GetMapping("/export-excel")
     public void exportStudentSelectionToExcel(@PathVariable String roomId,
                                               HttpServletResponse response) {
