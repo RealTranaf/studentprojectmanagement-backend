@@ -56,7 +56,6 @@ public class TopicService {
             selection.setRoom(room);
             selection.setVerified(false);
             selection.setCustom(false);
-            selection.setSelectedBy(student);
             studentTopicSelectionRepository.save(selection);
         } else {
             throw new RuntimeException("User or topic not found");
@@ -94,7 +93,6 @@ public class TopicService {
             selection.setRoom(room);
             selection.setVerified(false);
             selection.setCustom(true);
-            selection.setSelectedBy(student);
             studentTopicSelectionRepository.save(selection);
         } else {
             throw new RuntimeException("User or room not found");
@@ -131,7 +129,6 @@ public class TopicService {
             leadSelection.setRoom(room);
             leadSelection.setVerified(false);
             leadSelection.setCustom(true);
-            leadSelection.setSelectedBy(selectedBy);
             studentTopicSelectionRepository.save(leadSelection);
 
             for (String username : usernames) {
@@ -147,7 +144,6 @@ public class TopicService {
                     selection.setRoom(room);
                     selection.setVerified(false);
                     selection.setCustom(savedTopic.isCustom());
-                    selection.setSelectedBy(selectedBy);
                     studentTopicSelectionRepository.save(selection);
                 }
             }
@@ -302,7 +298,6 @@ public class TopicService {
             leadSelection.setRoom(room);
             leadSelection.setVerified(false);
             leadSelection.setCustom(topic.isCustom());
-            leadSelection.setSelectedBy(selectedBy);
             studentTopicSelectionRepository.save(leadSelection);
             for (String username : usernames) {
                 Optional<User> optionalUser = userRepository.findByUsername(username);
@@ -317,7 +312,6 @@ public class TopicService {
                     selection.setRoom(room);
                     selection.setVerified(false);
                     selection.setCustom(topic.isCustom());
-                    selection.setSelectedBy(selectedBy);
                     studentTopicSelectionRepository.save(selection);
                 }
             }
