@@ -19,8 +19,12 @@ public class WeeklyReportPost {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String title;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private LocalDateTime deadline;

@@ -16,7 +16,12 @@ public class Poll {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String title;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ElementCollection

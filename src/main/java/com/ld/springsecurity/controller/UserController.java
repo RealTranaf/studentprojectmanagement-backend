@@ -55,8 +55,6 @@ public class UserController {
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(@RequestParam String query){
         List<UserDto> userList = userService.searchUsers(query);
-//        System.out.println(userList);
-
         return ResponseEntity.ok(userList);
     }
 

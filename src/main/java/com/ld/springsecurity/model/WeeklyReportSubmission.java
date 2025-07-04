@@ -26,6 +26,8 @@ public class WeeklyReportSubmission {
     @JoinColumn(name = "student_id")
     private User student;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private LocalDateTime submittedAt;

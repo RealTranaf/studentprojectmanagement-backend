@@ -23,6 +23,8 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String title;
 
     @ManyToOne

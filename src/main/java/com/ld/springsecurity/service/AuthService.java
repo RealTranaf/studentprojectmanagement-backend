@@ -47,22 +47,9 @@ public class AuthService {
         this.resetTokenRepository = resetTokenRepository;
     }
 
-//    public User signup(RegisterUserDto input){
-//        User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getRole());
-//        user.setVerificationCode(generateVerificationCode());
-//        user.setVerificationCodeExpireAt(LocalDateTime.now().plusMinutes(15));
-//        user.setEnabled(false);
-//        sendVerificationEmail(user);
-//        User savedUser = userRepository.save(user);
-//        return savedUser;
-//    }
-
     public void signup(RegisterUserDto input){
-        if (userRepository.existsByEmail(input.getEmail())){
-            throw new RuntimeException("This email has already been registered");
-        }
-        if (userRepository.existsByUsername(input.getUsername())){
-            throw new RuntimeException("This username has already been taken");
+        if (userRepository.existsByEmail(input.getEmail()) || userRepository.existsByUsername(input.getUsername())) {
+            throw new RuntimeException("This email or username has already been registered");
         }
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getRole());
         user.setVerificationCode(generateVerificationCode());
@@ -75,9 +62,6 @@ public class AuthService {
     public LoginResponse auth(LoginUserDto input){
         User user = userRepository.findByUsername(input.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-//        if (!user.isEnabled()){
-//            throw new RuntimeException("Account not verified. Please verify your account.");
-//        }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

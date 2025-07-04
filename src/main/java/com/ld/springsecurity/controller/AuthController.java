@@ -40,8 +40,6 @@ public class AuthController {
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
-
-
     }
 
     @PostMapping("/verify")
