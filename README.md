@@ -23,6 +23,7 @@ A back-end system built with **Spring Boot** and **MySQL**, designed to streamli
 
 | Technology     | Description                         |
 |----------------|-------------------------------------|
+| Java           | Programming Language                |
 | Spring Boot    | RESTful API framework               |
 | Spring Security| Authentication and authorization    |
 | JPA (Hibernate)| ORM for database interaction        |
