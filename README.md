@@ -1,7 +1,6 @@
 # 🎓 Student-Teacher Project Management System (Graduation Project - 07/2025)
 
-A back-end system built with **Spring Boot** and **MySQL**, designed to streamline project management workflows between students and teachers in academic environments.
-Front-end for this project: https://github.com/RealTranaf/studentprojectmanagement-frontend
+A back-end system built with **Spring Boot** and **MySQL**, designed to streamline project management workflows between students and teachers in academic environments. Built as part of a full-stack graduation project. Front-end for this project: https://github.com/RealTranaf/studentprojectmanagement-frontend
 
 ## 📌 Features
 
