@@ -30,4 +30,3 @@ A back-end system built with **Spring Boot** and **MySQL**, designed to streamli
 | MySQL          | Relational database                 |
 | Maven          | Project build and dependency tool   |
 | Postman        | API testing and documentation       |
-
